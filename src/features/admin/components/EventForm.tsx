@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { availableThemes } from "@/features/themes/registry";
 import { GalleryManager, type GalleryItem } from "@/features/admin/components/GalleryManager";
+import { FontSelector } from "@/features/admin/components/FontSelector";
+import { BackgroundSelector } from "@/features/admin/components/BackgroundSelector";
 
 type EventFormProps = {
   mode: "create" | "edit";
@@ -60,6 +62,9 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
     timezone: String(initialValues.timezone ?? "America/Mexico_City"),
     is_published: Boolean(initialValues.is_published ?? false),
     theme_key: String(initialValues.theme_key ?? "elegant"),
+    font_heading: String(initialValues.font_heading ?? "Playfair Display"),
+    background_image_url: (initialValues.background_image_url as string | null) ?? null,
+    default_background_key: (initialValues.default_background_key as string | null) ?? null,
     whatsapp_number: String(initialValues.whatsapp_number ?? "52"),
     message_template: String(initialValues.message_template ?? "Hola, confirmo mi asistencia a {{eventTitle}}."),
     sections: ensureArray<SectionItem>(initialValues.sections),
@@ -87,6 +92,9 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         timezone: form.timezone,
         is_published: form.is_published,
         theme_key: form.theme_key,
+        font_heading: form.font_heading,
+        background_image_url: form.background_image_url || null,
+        default_background_key: form.default_background_key || null,
         whatsapp_number: form.whatsapp_number,
         message_template: form.message_template,
         sections: form.sections.map((item, index) => ({
@@ -185,6 +193,15 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
           </select>
         </label>
       </div>
+
+      <FontSelector value={form.font_heading} onChange={(key) => setForm((prev) => ({ ...prev, font_heading: key }))} />
+
+      <BackgroundSelector
+        backgroundImageUrl={form.background_image_url}
+        defaultBackgroundKey={form.default_background_key}
+        onChangePreset={(key) => setForm((prev) => ({ ...prev, default_background_key: key }))}
+        onChangeCustomUrl={(url) => setForm((prev) => ({ ...prev, background_image_url: url || null }))}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-sm">

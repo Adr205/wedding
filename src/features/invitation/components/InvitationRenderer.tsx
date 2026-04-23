@@ -5,6 +5,8 @@ import { getThemeByKey } from "@/features/themes/registry";
 import type { FullInvitation } from "@/features/invitation/types";
 import { RsvpButtons } from "@/features/invitation/components/RsvpButtons";
 import { CountdownTimer } from "@/features/invitation/components/CountdownTimer";
+import { resolveBackgroundUrl } from "@/features/themes/backgrounds";
+import { buildFontUrl } from "@/features/themes/fonts";
 
 type InvitationRendererProps = {
   invitation: FullInvitation;
@@ -46,8 +48,21 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
   const theme = getThemeByKey(invitation.theme.theme_key);
   const mainDate = new Date(invitation.event.main_date);
 
+  const bgUrl = resolveBackgroundUrl(invitation.theme.background_image_url, invitation.theme.default_background_key);
+  const fontKey = (invitation.theme.typography as Record<string, string> | undefined)?.heading ?? "Playfair Display";
+  const fontFamily = `'${fontKey}', Georgia, serif`;
+
   return (
-    <main className={`min-h-screen ${theme.className}`}>
+    <main
+      className={`min-h-screen ${bgUrl ? theme.textClassName : theme.className} relative`}
+      style={bgUrl ? { backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center", backgroundAttachment: "fixed" } : undefined}
+    >
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link rel="stylesheet" href={buildFontUrl(fontKey)} />
+
+      {/* Tint overlay for readability when bg image is set */}
+      {bgUrl ? <div className={`fixed inset-0 -z-10 ${theme.overlayClassName}`} aria-hidden /> : null}
+
       {/* ── Hero ───────────────────────────────────────── */}
       <header className="relative px-6 pt-16 pb-10 text-center overflow-hidden">
         <p className="text-xs tracking-[0.4em] uppercase opacity-40 mb-8 font-medium">
@@ -56,7 +71,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
 
         <h1
           className="text-5xl sm:text-6xl md:text-7xl font-bold leading-tight tracking-tight mb-5"
-          style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+          style={{ fontFamily: fontFamily }}
         >
           {theme.renderHeroTitle(invitation)}
         </h1>
@@ -72,7 +87,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
           <div className="text-center">
             <p
               className="text-5xl font-bold leading-none"
-              style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+              style={{ fontFamily: fontFamily }}
             >
               {format(mainDate, "d", { locale: es })}
             </p>
@@ -85,7 +100,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
           <div className="text-center">
             <p
               className="text-3xl font-bold leading-none"
-              style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+              style={{ fontFamily: fontFamily }}
             >
               {format(mainDate, "HH:mm")}
             </p>
@@ -139,7 +154,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
 
       {/* ── Countdown ───────────────────────────────────── */}
       <div className="max-w-2xl mx-auto px-6">
-        <CountdownTimer targetDate={invitation.event.main_date} />
+        <CountdownTimer targetDate={invitation.event.main_date} headingFont={fontKey} />
       </div>
 
       <div className="max-w-3xl mx-auto px-6">
@@ -153,7 +168,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
             <div key={section.section_key}>
               <h2
                 className="text-2xl font-semibold mb-3"
-                style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+                style={{ fontFamily: fontFamily }}
               >
                 {section.heading}
               </h2>
@@ -169,7 +184,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
           <article className="rounded-2xl bg-white/40 backdrop-blur-sm p-6">
             <h2
               className="text-xl font-semibold mb-5 text-center"
-              style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+              style={{ fontFamily: fontFamily }}
             >
               Itinerario
             </h2>
@@ -214,7 +229,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
                       <span className="text-base">📍</span>
                       <h3
                         className="font-semibold text-lg"
-                        style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+                        style={{ fontFamily: fontFamily }}
                       >
                         {location.label}
                       </h3>

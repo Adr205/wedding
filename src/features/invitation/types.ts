@@ -43,8 +43,11 @@ export type EventLocation = {
 export type EventTheme = {
   theme_key: string;
   palette?: Record<string, string>;
+  /** typography.heading stores the selected Google Font key, e.g. "Great Vibes" */
   typography?: Record<string, string>;
   block_config?: Record<string, boolean>;
+  background_image_url?: string | null;
+  default_background_key?: string | null;
 };
 
 export type EventRsvpSettings = {
