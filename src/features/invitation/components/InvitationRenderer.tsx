@@ -3,10 +3,11 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { getThemeByKey } from "@/features/themes/registry";
 import type { FullInvitation } from "@/features/invitation/types";
-import { RsvpButtons } from "@/features/invitation/components/RsvpButtons";
 import { CountdownTimer } from "@/features/invitation/components/CountdownTimer";
+import { RSVPForm } from "@/features/rsvp/RSVPForm";
 import { resolveBackgroundUrl } from "@/features/themes/backgrounds";
 import { buildFontUrl } from "@/features/themes/fonts";
+import { buildGoogleCalendarLink } from "@/features/calendar/buildCalendarLinks";
 
 type InvitationRendererProps = {
   invitation: FullInvitation;
@@ -108,9 +109,6 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
           </div>
         </div>
 
-        <div className="flex justify-center mt-4">
-          <RsvpButtons invitation={invitation} ctaClassName={theme.ctaClassName} />
-        </div>
       </header>
 
       {/* ── Gallery ─────────────────────────────────────── */}
@@ -273,15 +271,54 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
         </section>
       ) : null}
 
-      {/* ── Footer CTA ──────────────────────────────────── */}
+      {/* ── RSVP ────────────────────────────────────────── */}
+      {invitation.rsvp.enabled ? (
+        <section className="px-6 pb-10 max-w-sm mx-auto text-center">
+          <div className="max-w-3xl mx-auto">
+            <Ornament className="my-8" />
+          </div>
+          <p
+            className="text-2xl font-semibold mb-2"
+            style={{ fontFamily: fontFamily }}
+          >
+            ¿Confirmas tu asistencia?
+          </p>
+          <p className="text-sm opacity-50 mb-6">
+            Tu lugar es importante para nosotros.
+          </p>
+          <RSVPForm
+            slug={invitation.event.slug}
+            ctaClassName={theme.ctaClassName}
+            headingFont={fontKey}
+          />
+        </section>
+      ) : null}
+
+      {/* ── Footer ──────────────────────────────────────── */}
       <div className="px-6 pb-16 text-center">
-        <div className="max-w-3xl mx-auto px-6">
+        <div className="max-w-3xl mx-auto">
           <Ornament className="my-8" />
         </div>
-        <div className="flex justify-center mb-10">
-          <RsvpButtons invitation={invitation} ctaClassName={theme.ctaClassName} />
-        </div>
-        <p className="text-xs opacity-25 tracking-[0.3em] uppercase">AvCenter Invitations</p>
+        <a
+          href={buildGoogleCalendarLink({
+            title: invitation.event.title,
+            startIso: invitation.event.main_date,
+            details: `Invitación a ${invitation.event.title}`,
+            location: invitation.locations[0]?.address,
+          })}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-current px-6 py-3 text-sm font-semibold opacity-60 hover:opacity-80 transition-opacity mb-10"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          Agendar en calendario
+        </a>
+        <p className="text-xs opacity-25 tracking-[0.3em] uppercase block">AvCenter Invitations</p>
       </div>
     </main>
   );

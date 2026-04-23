@@ -134,6 +134,28 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
   return { ok: true, eventId: savedEventId };
 }
 
+export async function listEventGuests(eventId: string, ownerId: string) {
+  const supabase = await createClient();
+
+  // Verify ownership first
+  const { data: event } = await supabase
+    .from("events")
+    .select("id")
+    .eq("id", eventId)
+    .eq("owner_id", ownerId)
+    .single();
+
+  if (!event) return [];
+
+  const { data } = await supabase
+    .from("event_guests")
+    .select("id, guest_name, guest_phone, plus_ones, confirmation_status, created_at")
+    .eq("event_id", eventId)
+    .order("created_at", { ascending: false });
+
+  return data ?? [];
+}
+
 export function getDraftEventDefaults(): EventFormInput {
   return {
     slug: "",
