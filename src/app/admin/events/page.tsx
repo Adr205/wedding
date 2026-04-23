@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listEvents } from "@/features/admin/data/events";
 import { requirePageUser } from "@/lib/auth/requireUser";
+import { getMyRole, isSuperAdmin } from "@/lib/auth/getRole";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   wedding: "Boda",
@@ -10,7 +11,9 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 
 export default async function AdminEventsPage() {
   const user = await requirePageUser();
-  const events = await listEvents(user.id);
+  const role = await getMyRole(user.id);
+  const superAdmin = isSuperAdmin(role);
+  const events = await listEvents(user.id, superAdmin);
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -30,16 +33,27 @@ export default async function AdminEventsPage() {
       </header>
 
       <main className="mx-auto max-w-5xl px-6 py-10">
+        {superAdmin ? (
+          <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 mb-6">
+            <span className="rounded-full bg-amber-400 px-2.5 py-0.5 text-xs font-semibold text-stone-900">
+              SUPER ADMIN
+            </span>
+            <p className="text-sm text-amber-800">
+              Mostrando eventos de <strong>todos los usuarios</strong>.
+            </p>
+          </div>
+        ) : null}
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1
               className="text-2xl font-bold text-stone-900"
               style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
             >
-              Tus invitaciones
+              {superAdmin ? "Todos los eventos" : "Tus invitaciones"}
             </h1>
             <p className="text-stone-500 text-sm mt-0.5">
-              {events.length} evento{events.length !== 1 ? "s" : ""} creado{events.length !== 1 ? "s" : ""}
+              {events.length} evento{events.length !== 1 ? "s" : ""} en total
             </p>
           </div>
           <Link
@@ -98,7 +112,17 @@ export default async function AdminEventsPage() {
                   >
                     {event.title}
                   </h3>
-                  <p className="text-xs text-stone-400 font-mono mb-4">/i/{event.slug}</p>
+                  <p className="text-xs text-stone-400 font-mono mb-1">/i/{event.slug}</p>
+                  {superAdmin && "owner_id" in event ? (
+                    <p className="text-[10px] text-zinc-400 font-mono mb-3 truncate" title={String(event.owner_id)}>
+                      uid: {String(event.owner_id).slice(0, 8)}…
+                      {event.owner_id === user.id ? (
+                        <span className="ml-1 text-rose-400">(tú)</span>
+                      ) : null}
+                    </p>
+                  ) : (
+                    <div className="mb-4" />
+                  )}
 
                   <div className="flex items-center gap-2 pt-3 border-t border-zinc-100">
                     <Link

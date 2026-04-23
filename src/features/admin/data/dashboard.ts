@@ -18,6 +18,7 @@ export type UpcomingEvent = {
   main_date: string;
   is_published: boolean;
   confirmations: number;
+  owner_id?: string;
 };
 
 export type RecentRsvp = {
@@ -29,18 +30,18 @@ export type RecentRsvp = {
   event_slug: string;
 };
 
-export async function getDashboardStats(ownerId: string): Promise<DashboardStats> {
+export async function getDashboardStats(ownerId: string, superAdmin = false): Promise<DashboardStats> {
   const supabase = await createClient();
 
-  const [
-    { data: events },
-    { data: guests },
-  ] = await Promise.all([
-    supabase
-      .from("events")
-      .select("id, slug, title, event_type, main_date, is_published")
-      .eq("owner_id", ownerId)
-      .order("main_date", { ascending: true }),
+  let eventsQuery = supabase
+    .from("events")
+    .select("id, slug, title, event_type, main_date, is_published, owner_id")
+    .order("main_date", { ascending: true });
+
+  if (!superAdmin) eventsQuery = eventsQuery.eq("owner_id", ownerId);
+
+  const [{ data: events }, { data: guests }] = await Promise.all([
+    eventsQuery,
     supabase
       .from("event_guests")
       .select("id, event_id, guest_name, plus_ones, confirmation_status, created_at")
@@ -51,19 +52,24 @@ export async function getDashboardStats(ownerId: string): Promise<DashboardStats
   const allEvents = events ?? [];
   const allGuests = guests ?? [];
 
+  // For non-super-admin, only count guests from own events
+  const ownEventIds = new Set(
+    superAdmin ? allEvents.map((e) => e.id) : allEvents.filter((e) => e.owner_id === ownerId).map((e) => e.id)
+  );
+  const relevantGuests = allGuests.filter((g) => ownEventIds.has(g.event_id));
+
   const now = new Date();
   const upcoming = allEvents
     .filter((e) => new Date(e.main_date) >= now)
     .slice(0, 5)
     .map((e) => ({
       ...e,
-      confirmations: allGuests.filter((g) => g.event_id === e.id).length,
+      confirmations: relevantGuests.filter((g) => g.event_id === e.id).length,
     }));
 
-  // Build event title lookup for recent RSVPs
   const eventMap = new Map(allEvents.map((e) => [e.id, e]));
 
-  const recentRsvps: RecentRsvp[] = allGuests.slice(0, 6).map((g) => ({
+  const recentRsvps: RecentRsvp[] = relevantGuests.slice(0, 6).map((g) => ({
     id: g.id,
     guest_name: g.guest_name,
     plus_ones: g.plus_ones,
@@ -76,8 +82,8 @@ export async function getDashboardStats(ownerId: string): Promise<DashboardStats
     totalEvents: allEvents.length,
     publishedEvents: allEvents.filter((e) => e.is_published).length,
     draftEvents: allEvents.filter((e) => !e.is_published).length,
-    totalConfirmations: allGuests.length,
-    totalAttendees: allGuests.reduce((sum, g) => sum + 1 + (g.plus_ones ?? 0), 0),
+    totalConfirmations: relevantGuests.length,
+    totalAttendees: relevantGuests.reduce((sum, g) => sum + 1 + (g.plus_ones ?? 0), 0),
     upcomingEvents: upcoming,
     recentRsvps,
   };
