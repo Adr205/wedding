@@ -31,7 +31,7 @@ export async function getEventBundle(eventId: string, ownerId: string) {
 
   const [{ data: theme }, { data: sections }, { data: gallery }, { data: schedule }, { data: locations }, { data: rsvp }] =
     await Promise.all([
-      supabase.from("event_themes").select("theme_key").eq("event_id", eventId).single(),
+      supabase.from("event_themes").select("theme_key, typography, background_image_url, default_background_key").eq("event_id", eventId).single(),
       supabase.from("event_sections").select("section_key, heading, body, display_order").eq("event_id", eventId).order("display_order"),
       supabase.from("event_gallery").select("image_url, caption, display_order").eq("event_id", eventId).order("display_order"),
       supabase
@@ -94,7 +94,13 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
   const savedEventId = upsertEvent.data.id;
 
   await Promise.all([
-    supabase.from("event_themes").upsert({ event_id: savedEventId, theme_key: data.theme_key }),
+    supabase.from("event_themes").upsert({
+      event_id: savedEventId,
+      theme_key: data.theme_key,
+      typography: { heading: data.font_heading ?? "Playfair Display" },
+      background_image_url: data.background_image_url ?? null,
+      default_background_key: data.default_background_key ?? null,
+    }),
     supabase
       .from("event_rsvp_settings")
       .upsert({
@@ -138,6 +144,9 @@ export function getDraftEventDefaults(): EventFormInput {
     timezone: "America/Mexico_City",
     is_published: false,
     theme_key: "elegant",
+    font_heading: "Playfair Display",
+    background_image_url: null,
+    default_background_key: null,
     whatsapp_number: "52",
     message_template: "Hola, confirmo mi asistencia a {{eventTitle}}.",
     sections: [],
