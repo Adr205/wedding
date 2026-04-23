@@ -3,18 +3,15 @@ import { eventFormSchema, type EventFormInput } from "@/lib/validation/eventSche
 
 const EVENT_SELECT = "id, slug, event_type, title, honoree_names, main_date, timezone, is_published";
 
-export async function listEvents(ownerId: string) {
+const EVENT_SELECT_WITH_OWNER = "id, slug, event_type, title, honoree_names, main_date, timezone, is_published, owner_id";
+
+export async function listEvents(ownerId: string, superAdmin = false) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("events")
-    .select(EVENT_SELECT)
-    .eq("owner_id", ownerId)
-    .order("created_at", { ascending: false });
+  let query = supabase.from("events").select(EVENT_SELECT_WITH_OWNER).order("created_at", { ascending: false });
+  if (!superAdmin) query = query.eq("owner_id", ownerId);
 
-  if (error) {
-    return [];
-  }
-
+  const { data, error } = await query;
+  if (error) return [];
   return data ?? [];
 }
 

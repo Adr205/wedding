@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requirePageUser } from "@/lib/auth/requireUser";
+import { getMyRole, isSuperAdmin } from "@/lib/auth/getRole";
 import { getDashboardStats } from "@/features/admin/data/dashboard";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -50,7 +51,9 @@ function formatTimeAgo(iso: string) {
 
 export default async function AdminDashboard() {
   const user = await requirePageUser();
-  const stats = await getDashboardStats(user.id);
+  const role = await getMyRole(user.id);
+  const superAdmin = isSuperAdmin(role);
+  const stats = await getDashboardStats(user.id, superAdmin);
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -77,6 +80,17 @@ export default async function AdminDashboard() {
 
       <main className="mx-auto max-w-5xl px-6 py-10 space-y-8">
         {/* Title row */}
+        {superAdmin ? (
+          <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <span className="rounded-full bg-amber-400 px-2.5 py-0.5 text-xs font-semibold text-stone-900">
+              SUPER ADMIN
+            </span>
+            <p className="text-sm text-amber-800">
+              Estás viendo métricas y eventos de <strong>todos los usuarios</strong>.
+            </p>
+          </div>
+        ) : null}
+
         <div className="flex items-center justify-between">
           <div>
             <h1
@@ -85,7 +99,9 @@ export default async function AdminDashboard() {
             >
               Panel general
             </h1>
-            <p className="text-stone-500 text-sm mt-0.5">Resumen de todos tus eventos activos</p>
+            <p className="text-stone-500 text-sm mt-0.5">
+              {superAdmin ? "Vista global — todos los usuarios" : "Resumen de todos tus eventos activos"}
+            </p>
           </div>
           <Link
             href="/admin/events/new"
