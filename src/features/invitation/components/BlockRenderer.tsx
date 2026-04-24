@@ -15,6 +15,9 @@ import { RsvpBlock } from "./blocks/RsvpBlock";
 import { DividerBlock } from "./blocks/DividerBlock";
 import { DressCodeBlock } from "./blocks/DressCodeBlock";
 import { GiftRegistryBlock } from "./blocks/GiftRegistryBlock";
+import { VideoBlock } from "./blocks/VideoBlock";
+import { ContainerBlock } from "./blocks/ContainerBlock";
+import { AnimatedWrapper } from "./AnimatedWrapper";
 
 export type RenderContext = {
   event: EventRow;
@@ -23,8 +26,11 @@ export type RenderContext = {
   fontKey: string;
   fontFamily: string;
   rsvp: EventRsvpSettings;
-  /** Full invitation, needed by HeroBlock to call themeObj.renderHeroTitle */
   invitation: FullInvitation;
+  /** CSS color for text override (cascades via color property) */
+  textColor?: string;
+  /** CSS color/rgba for card backgrounds */
+  cardBg?: string;
 };
 
 type Props = {
@@ -36,32 +42,30 @@ export function BlockRenderer({ block, ctx }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cfg = block.config as any;
 
-  switch (block.block_type) {
-    case "hero":
-      return <HeroBlock config={cfg} ctx={ctx} />;
-    case "countdown":
-      return <CountdownBlock config={cfg} ctx={ctx} />;
-    case "quote":
-      return <QuoteBlock config={cfg} ctx={ctx} />;
-    case "text":
-      return <TextBlock config={cfg} ctx={ctx} />;
-    case "photo":
-      return <PhotoBlock config={cfg} />;
-    case "gallery":
-      return <GalleryBlock config={cfg} />;
-    case "schedule":
-      return <ScheduleBlock config={cfg} ctx={ctx} />;
-    case "location":
-      return <LocationBlock config={cfg} ctx={ctx} />;
-    case "rsvp":
-      return <RsvpBlock config={cfg} ctx={ctx} />;
-    case "divider":
-      return <DividerBlock config={cfg} />;
-    case "dress_code":
-      return <DressCodeBlock config={cfg} ctx={ctx} />;
-    case "gift_registry":
-      return <GiftRegistryBlock config={cfg} ctx={ctx} />;
-    default:
-      return null;
-  }
+  const content = (() => {
+    switch (block.block_type) {
+      case "hero":        return <HeroBlock config={cfg} ctx={ctx} />;
+      case "countdown":   return <CountdownBlock config={cfg} ctx={ctx} />;
+      case "quote":       return <QuoteBlock config={cfg} ctx={ctx} />;
+      case "text":        return <TextBlock config={cfg} ctx={ctx} />;
+      case "photo":       return <PhotoBlock config={cfg} />;
+      case "gallery":     return <GalleryBlock config={cfg} />;
+      case "schedule":    return <ScheduleBlock config={cfg} ctx={ctx} />;
+      case "location":    return <LocationBlock config={cfg} ctx={ctx} />;
+      case "rsvp":        return <RsvpBlock config={cfg} ctx={ctx} />;
+      case "divider":     return <DividerBlock config={cfg} />;
+      case "dress_code":  return <DressCodeBlock config={cfg} ctx={ctx} />;
+      case "gift_registry": return <GiftRegistryBlock config={cfg} ctx={ctx} />;
+      case "video":       return <VideoBlock config={cfg} />;
+      case "grid":        return <ContainerBlock config={{ ...cfg, layout: "grid" }} ctx={ctx} />;
+      case "flex":        return <ContainerBlock config={{ ...cfg, layout: "flex" }} ctx={ctx} />;
+      default:            return null;
+    }
+  })();
+
+  return (
+    <AnimatedWrapper animation={block.animation}>
+      {content}
+    </AnimatedWrapper>
+  );
 }

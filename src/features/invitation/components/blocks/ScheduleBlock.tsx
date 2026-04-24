@@ -11,7 +11,7 @@ export function ScheduleBlock({ config, ctx }: Props) {
 
   return (
     <section className="px-4 sm:px-6 pb-6 max-w-2xl mx-auto">
-      <article className="rounded-2xl bg-white/40 backdrop-blur-sm p-6">
+      <article className="rounded-2xl backdrop-blur-sm p-6" style={{ background: "var(--inv-card, rgba(255,255,255,0.4))" }}>
         <h2
           className="text-xl font-semibold mb-5 text-center"
           style={{ fontFamily: ctx.fontFamily }}

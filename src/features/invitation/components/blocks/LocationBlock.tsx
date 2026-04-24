@@ -16,7 +16,7 @@ export function LocationBlock({ config, ctx }: Props) {
 
   return (
     <section className="px-4 sm:px-6 pb-6 max-w-4xl mx-auto">
-      <article className="rounded-2xl bg-white/40 backdrop-blur-sm overflow-hidden">
+      <article className="rounded-2xl backdrop-blur-sm overflow-hidden" style={{ background: "var(--inv-card, rgba(255,255,255,0.4))" }}>
         <div className="p-6 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>

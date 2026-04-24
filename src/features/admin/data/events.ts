@@ -27,12 +27,12 @@ export async function getEventBundle(eventId: string, ownerId: string, superAdmi
   const [{ data: theme }, { data: blocks }, { data: rsvp }] = await Promise.all([
     supabase
       .from("event_themes")
-      .select("theme_key, typography, background_image_url, default_background_key")
+      .select("theme_key, palette, typography, background_image_url, default_background_key")
       .eq("event_id", eventId)
       .single(),
     supabase
       .from("page_blocks")
-      .select("id, block_type, config, display_order, enabled")
+      .select("id, block_type, config, display_order, enabled, animation")
       .eq("event_id", eventId)
       .order("display_order"),
     supabase
@@ -42,12 +42,16 @@ export async function getEventBundle(eventId: string, ownerId: string, superAdmi
       .single(),
   ]);
 
+  const palette = theme?.palette as Record<string, string> | null;
+
   return {
     ...event,
     theme_key: theme?.theme_key ?? "elegant",
     font_heading: (theme?.typography as Record<string, string> | null)?.heading ?? "Playfair Display",
     background_image_url: theme?.background_image_url ?? null,
     default_background_key: theme?.default_background_key ?? null,
+    text_color: palette?.text ?? null,
+    card_bg: palette?.card_bg ?? null,
     whatsapp_number: rsvp?.whatsapp_number ?? "",
     message_template: rsvp?.message_template ?? "Hola, confirmo mi asistencia a {{eventTitle}}.",
     blocks: blocks ?? [],
@@ -99,6 +103,10 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
       typography: { heading: data.font_heading ?? "Playfair Display" },
       background_image_url: data.background_image_url ?? null,
       default_background_key: data.default_background_key ?? null,
+      palette: {
+        ...(data.text_color ? { text: data.text_color } : {}),
+        ...(data.card_bg ? { card_bg: data.card_bg } : {}),
+      },
     }),
     supabase.from("event_rsvp_settings").upsert({
       event_id: savedEventId,
@@ -119,6 +127,7 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
         config: block.config,
         display_order: i,
         enabled: block.enabled,
+        animation: block.animation ?? null,
       })),
     );
   }
