@@ -8,7 +8,6 @@ type RsvpButtonsProps = {
 };
 
 export function RsvpButtons({ invitation, ctaClassName }: RsvpButtonsProps) {
-  const mainLocation = invitation.locations[0];
   const whatsappLink = buildWhatsappLink({
     whatsappNumber: invitation.rsvp.whatsapp_number,
     messageTemplate: invitation.rsvp.message_template,
@@ -19,7 +18,7 @@ export function RsvpButtons({ invitation, ctaClassName }: RsvpButtonsProps) {
     title: invitation.event.title,
     startIso: invitation.event.main_date,
     details: `Invitación a ${invitation.event.title}`,
-    location: mainLocation?.address,
+    location: undefined,
   });
 
   return (
