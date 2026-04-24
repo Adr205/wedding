@@ -3,6 +3,7 @@ import { EventForm } from "@/features/admin/components/EventForm";
 import { QRDownloadButton } from "@/features/admin/components/QRDownloadButton";
 import { getDraftEventDefaults, getEventBundle, listEventGuests } from "@/features/admin/data/events";
 import { requirePageUser } from "@/lib/auth/requireUser";
+import { getMyRole, isSuperAdmin } from "@/lib/auth/getRole";
 
 type AdminEventDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -11,6 +12,8 @@ type AdminEventDetailPageProps = {
 export default async function AdminEventDetailPage({ params }: AdminEventDetailPageProps) {
   const user = await requirePageUser();
   const { id } = await params;
+  const role = await getMyRole(user.id);
+  const superAdmin = isSuperAdmin(role);
 
   if (id === "new") {
     return (
@@ -27,8 +30,8 @@ export default async function AdminEventDetailPage({ params }: AdminEventDetailP
   }
 
   const [bundle, guests] = await Promise.all([
-    getEventBundle(id, user.id),
-    listEventGuests(id, user.id),
+    getEventBundle(id, user.id, superAdmin),
+    listEventGuests(id, user.id, superAdmin),
   ]);
 
   if (!bundle) {

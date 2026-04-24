@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/serviceClient";
 import { saveEventBundle } from "@/features/admin/data/events";
 import { requireApiUser } from "@/lib/auth/requireUser";
+import { getMyRole, isSuperAdmin } from "@/lib/auth/getRole";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -37,8 +39,10 @@ export async function PUT(request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
+  const role = await getMyRole(user.id);
+  const superAdmin = isSuperAdmin(role);
   const payload = await request.json();
-  const result = await saveEventBundle(user.id, payload, id);
+  const result = await saveEventBundle(user.id, payload, id, superAdmin);
 
   if (!result.ok) {
     return NextResponse.json({ message: result.message }, { status: 400 });
@@ -54,9 +58,13 @@ export async function DELETE(_: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const supabase = await createClient();
+  const role = await getMyRole(user.id);
+  const superAdmin = isSuperAdmin(role);
+  const client = superAdmin ? createServiceClient() : await createClient();
 
-  const { error } = await supabase.from("events").delete().eq("id", id).eq("owner_id", user.id);
+  let query = client.from("events").delete().eq("id", id);
+  if (!superAdmin) query = query.eq("owner_id", user.id);
+  const { error } = await query;
 
   if (error) {
     return NextResponse.json({ message: error.message }, { status: 400 });
@@ -64,3 +72,4 @@ export async function DELETE(_: Request, context: RouteContext) {
 
   return NextResponse.json({ ok: true });
 }
+
