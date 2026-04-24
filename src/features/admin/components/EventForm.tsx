@@ -35,6 +35,8 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
     font_heading: String(initialValues.font_heading ?? "Playfair Display"),
     background_image_url: (initialValues.background_image_url as string | null) ?? null,
     default_background_key: (initialValues.default_background_key as string | null) ?? null,
+    text_color: (initialValues.text_color as string | null) ?? null,
+    card_bg: (initialValues.card_bg as string | null) ?? null,
     whatsapp_number: String(initialValues.whatsapp_number ?? "52"),
     message_template: String(
       initialValues.message_template ?? "Hola, confirmo mi asistencia a {{eventTitle}}.",
@@ -64,6 +66,8 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         font_heading: form.font_heading,
         background_image_url: form.background_image_url || null,
         default_background_key: form.default_background_key || null,
+        text_color: form.text_color || null,
+        card_bg: form.card_bg || null,
         whatsapp_number: form.whatsapp_number,
         message_template: form.message_template,
         blocks: form.blocks.map((block, i) => ({ ...block, display_order: i })),
@@ -186,6 +190,75 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         onChangePreset={(key) => setForm((prev) => ({ ...prev, default_background_key: key }))}
         onChangeCustomUrl={(url) => setForm((prev) => ({ ...prev, background_image_url: url || null }))}
       />
+
+      {/* ── Colores ────────────────────────────────────── */}
+      <div className="space-y-2 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+        <h3 className="font-semibold text-sm">Colores de la invitación</h3>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          Sobreescribe el color del texto y de las cards. Útil cuando el fondo dificulta la lectura.
+        </p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-sm flex items-center gap-2">
+              Color del texto
+              <input
+                type="color"
+                value={form.text_color ?? "#ffffff"}
+                onChange={(e) => setForm((prev) => ({ ...prev, text_color: e.target.value }))}
+                className="w-8 h-8 rounded cursor-pointer border border-zinc-300"
+              />
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="flex-1 rounded-lg border border-zinc-300 p-2 text-sm dark:border-zinc-600 dark:bg-zinc-800"
+                placeholder="#ffffff o rgba(…)"
+                value={form.text_color ?? ""}
+                onChange={(e) => setForm((prev) => ({ ...prev, text_color: e.target.value || null }))}
+              />
+              {form.text_color ? (
+                <button
+                  type="button"
+                  onClick={() => setForm((prev) => ({ ...prev, text_color: null }))}
+                  className="rounded-lg border border-zinc-300 px-2 text-xs hover:bg-zinc-100 dark:border-zinc-600"
+                >
+                  Quitar
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm flex items-center gap-2">
+              Fondo de cards
+              <input
+                type="color"
+                value={form.card_bg ?? "#ffffff"}
+                onChange={(e) => setForm((prev) => ({ ...prev, card_bg: e.target.value }))}
+                className="w-8 h-8 rounded cursor-pointer border border-zinc-300"
+              />
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="flex-1 rounded-lg border border-zinc-300 p-2 text-sm dark:border-zinc-600 dark:bg-zinc-800"
+                placeholder="rgba(255,255,255,0.4)"
+                value={form.card_bg ?? ""}
+                onChange={(e) => setForm((prev) => ({ ...prev, card_bg: e.target.value || null }))}
+              />
+              {form.card_bg ? (
+                <button
+                  type="button"
+                  onClick={() => setForm((prev) => ({ ...prev, card_bg: null }))}
+                  className="rounded-lg border border-zinc-300 px-2 text-xs hover:bg-zinc-100 dark:border-zinc-600"
+                >
+                  Quitar
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ── RSVP config ────────────────────────────────── */}
       <div className="grid gap-4 sm:grid-cols-2">

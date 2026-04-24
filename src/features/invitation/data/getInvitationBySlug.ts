@@ -21,7 +21,7 @@ export async function getInvitationBySlug(slug: string): Promise<FullInvitation 
       .single(),
     supabase
       .from("page_blocks")
-      .select("id, block_type, config, display_order, enabled")
+      .select("id, block_type, config, display_order, enabled, animation")
       .eq("event_id", event.id)
       .order("display_order"),
     supabase
