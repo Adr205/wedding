@@ -15,7 +15,12 @@ export default async function AdminEventDetailPage({ params }: AdminEventDetailP
   if (id === "new") {
     return (
       <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-6 py-10">
-        <h1 className="text-3xl font-bold">Nuevo evento</h1>
+        <div className="flex items-center gap-4">
+          <Link href="/admin/events" className="text-sm text-zinc-500 hover:text-zinc-800 transition-colors">
+            ← Eventos
+          </Link>
+          <h1 className="text-3xl font-bold">Nuevo evento</h1>
+        </div>
         <EventForm mode="create" initialValues={getDraftEventDefaults()} />
       </main>
     );
@@ -40,7 +45,12 @@ export default async function AdminEventDetailPage({ params }: AdminEventDetailP
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-6 py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-bold">Editar evento</h1>
+        <div className="flex items-center gap-4">
+          <Link href="/admin/events" className="text-sm text-zinc-500 hover:text-zinc-800 transition-colors">
+            ← Eventos
+          </Link>
+          <h1 className="text-3xl font-bold">Editar evento</h1>
+        </div>
         <div className="flex items-center gap-3">
           <QRDownloadButton eventId={id} slug={bundle.slug} />
           <Link

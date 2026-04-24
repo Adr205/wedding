@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast, Toaster } from "sonner";
 
 export function LoginForm() {
   const router = useRouter();
@@ -23,17 +24,21 @@ export function LoginForm() {
 
     if (!res.ok) {
       const data = (await res.json()) as { message?: string };
-      setErrorMessage(data.message ?? "No se pudo iniciar sesión");
+      const msg = data.message ?? "No se pudo iniciar sesión";
+      setErrorMessage(msg);
       setStatus("error");
+      toast.error(msg);
       return;
     }
 
-    router.push("/admin/events");
+    toast.success("Sesión iniciada correctamente");
+    router.push("/admin");
     router.refresh();
   }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-6 py-12">
+      <Toaster position="top-right" richColors />
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="mb-3 flex items-center justify-center gap-2">
