@@ -85,6 +85,7 @@ export type VideoConfig = {
 
 export type ContainerConfig = {
   layout: "grid" | "flex";
+  title?: string;
   columns?: 2 | 3 | 4;
   gap?: "sm" | "md" | "lg";
   align?: "start" | "center" | "end" | "stretch";
