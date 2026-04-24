@@ -19,9 +19,30 @@ function ensureArray<T>(input: unknown): T[] {
   return Array.isArray(input) ? (input as T[]) : [];
 }
 
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function isGlassValue(v: string | null): boolean {
+  return v !== null && v.startsWith("rgba(");
+}
+
+function extractHexFromRgba(v: string): string {
+  const m = v.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (!m) return "#ffffff";
+  return "#" + [m[1], m[2], m[3]].map((n) => parseInt(n).toString(16).padStart(2, "0")).join("");
+}
+
 export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
   const router = useRouter();
   const [status, setStatus] = useState<string>("");
+  const [cardBgGlass, setCardBgGlass] = useState<boolean>(() =>
+    isGlassValue((initialValues.card_bg as string | null) ?? null),
+  );
 
   const [form, setForm] = useState(() => ({
     slug: String(initialValues.slug ?? ""),
@@ -233,10 +254,31 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
               Fondo de cards
               <input
                 type="color"
-                value={form.card_bg ?? "#ffffff"}
-                onChange={(e) => setForm((prev) => ({ ...prev, card_bg: e.target.value }))}
+                value={form.card_bg ? (isGlassValue(form.card_bg) ? extractHexFromRgba(form.card_bg) : form.card_bg) : "#ffffff"}
+                onChange={(e) => {
+                  const hex = e.target.value;
+                  setForm((prev) => ({ ...prev, card_bg: cardBgGlass ? hexToRgba(hex, 0.4) : hex }));
+                }}
                 className="w-8 h-8 rounded cursor-pointer border border-zinc-300"
               />
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="w-4 h-4 rounded"
+                checked={cardBgGlass}
+                onChange={(e) => {
+                  const glass = e.target.checked;
+                  setCardBgGlass(glass);
+                  if (form.card_bg) {
+                    const hex = isGlassValue(form.card_bg)
+                      ? extractHexFromRgba(form.card_bg)
+                      : form.card_bg;
+                    setForm((prev) => ({ ...prev, card_bg: glass ? hexToRgba(hex, 0.4) : hex }));
+                  }
+                }}
+              />
+              Mantener efecto de vidrio (translúcido)
             </label>
             <div className="flex gap-2">
               <input
