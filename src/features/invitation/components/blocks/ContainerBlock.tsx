@@ -22,11 +22,18 @@ const ALIGN: Record<string, string> = {
   stretch: "items-stretch",
 };
 
-const JUSTIFY: Record<string, string> = {
+const JUSTIFY_FLEX: Record<string, string> = {
   start: "justify-start",
   center: "justify-center",
   end: "justify-end",
   between: "justify-between",
+};
+
+const JUSTIFY_GRID: Record<string, string> = {
+  start: "justify-items-start",
+  center: "justify-items-center",
+  end: "justify-items-end",
+  between: "justify-items-stretch",
 };
 
 type Props = { config: ContainerConfig; ctx: RenderContext };
@@ -36,22 +43,35 @@ export function ContainerBlock({ config, ctx }: Props) {
   if (children.length === 0) return null;
 
   const gap = GAP[config.gap ?? "md"] ?? "gap-4";
+  const align = ALIGN[config.align ?? "start"] ?? "items-start";
+
+  const title = config.title?.trim();
 
   if (config.layout === "flex") {
-    const align = ALIGN[config.align ?? "center"] ?? "items-center";
-    const justify = JUSTIFY[config.justify ?? "center"] ?? "justify-center";
+    const justify = JUSTIFY_FLEX[config.justify ?? "center"] ?? "justify-center";
     return (
-      <section className={`px-4 sm:px-6 pb-4 max-w-5xl mx-auto flex flex-wrap ${gap} ${align} ${justify}`}>
-        <ChildBlocks children={children} ctx={ctx} />
+      <section className="px-4 sm:px-6 pb-4 max-w-5xl mx-auto">
+        {title ? (
+          <p className="text-xs tracking-[0.3em] uppercase opacity-40 mb-4 text-center">{title}</p>
+        ) : null}
+        <div className={`flex flex-wrap ${gap} ${align} ${justify}`}>
+          <ChildBlocks children={children} ctx={ctx} />
+        </div>
       </section>
     );
   }
 
   // Grid (default)
   const cols = GRID_COLS[config.columns ?? 2] ?? "grid-cols-1 sm:grid-cols-2";
+  const justifyItems = JUSTIFY_GRID[config.justify ?? "start"] ?? "justify-items-start";
   return (
-    <section className={`px-4 sm:px-6 pb-4 max-w-5xl mx-auto grid ${cols} ${gap}`}>
-      <ChildBlocks children={children} ctx={ctx} />
+    <section className="px-4 sm:px-6 pb-4 max-w-5xl mx-auto">
+      {title ? (
+        <p className="text-xs tracking-[0.3em] uppercase opacity-40 mb-4 text-center">{title}</p>
+      ) : null}
+      <div className={`grid ${cols} ${gap} ${align} ${justifyItems}`}>
+        <ChildBlocks children={children} ctx={ctx} />
+      </div>
     </section>
   );
 }

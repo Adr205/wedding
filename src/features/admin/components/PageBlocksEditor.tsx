@@ -39,7 +39,11 @@ function toDateTimeLocalValue(isoDate: string | null | undefined) {
   if (!isoDate) return "";
   const d = new Date(isoDate);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toISOString().slice(0, 16);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+    `T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  );
 }
 
 function toIsoOrNull(local: string) {
@@ -62,8 +66,8 @@ function defaultConfig(type: BlockType): Record<string, unknown> {
     case "dress_code":   return { title: "", description: "", colors: [] };
     case "gift_registry":return { title: "", items: [] };
     case "video":        return { url: "", title: "", aspect: "16:9" };
-    case "grid":         return { columns: 2, gap: "md", children: [] };
-    case "flex":         return { gap: "md", align: "center", justify: "center", children: [] };
+    case "grid":         return { title: "", columns: 2, gap: "md", align: "start", justify: "start", children: [] };
+    case "flex":         return { title: "", gap: "md", align: "center", justify: "center", children: [] };
   }
 }
 
@@ -468,6 +472,10 @@ function ConfigPanel({
       const children: PageBlock[] = cfg.children ?? [];
       return (
         <div className="space-y-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Título (opcional)
+            <input className={inp()} placeholder="Ej. Nuestro equipo" value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
+          </label>
           <div className="grid grid-cols-2 gap-2">
             <label className="flex flex-col gap-1 text-sm">
               Columnas
@@ -485,6 +493,24 @@ function ConfigPanel({
                 <option value="lg">Grande</option>
               </select>
             </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Alinear filas (align-items)
+              <select className={inp()} value={cfg.align ?? "start"} onChange={(e) => set("align", e.target.value)}>
+                <option value="start">Inicio</option>
+                <option value="center">Centro</option>
+                <option value="end">Final</option>
+                <option value="stretch">Estirar</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              Alinear columnas (justify-items)
+              <select className={inp()} value={cfg.justify ?? "start"} onChange={(e) => set("justify", e.target.value)}>
+                <option value="start">Inicio</option>
+                <option value="center">Centro</option>
+                <option value="end">Final</option>
+                <option value="between">Estirar</option>
+              </select>
+            </label>
           </div>
           {depth === 0 ? (
             <MiniBlocksEditor blocks={children} onChange={(b) => set("children", b)} />
@@ -499,6 +525,10 @@ function ConfigPanel({
       const children: PageBlock[] = cfg.children ?? [];
       return (
         <div className="space-y-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Título (opcional)
+            <input className={inp()} placeholder="Ej. Nuestros padrinos" value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
+          </label>
           <div className="grid grid-cols-3 gap-2">
             <label className="flex flex-col gap-1 text-sm">
               Espaciado
@@ -509,7 +539,7 @@ function ConfigPanel({
               </select>
             </label>
             <label className="flex flex-col gap-1 text-sm">
-              Alineación
+              Alinear (align-items)
               <select className={inp()} value={cfg.align ?? "center"} onChange={(e) => set("align", e.target.value)}>
                 <option value="start">Inicio</option>
                 <option value="center">Centro</option>
@@ -518,7 +548,7 @@ function ConfigPanel({
               </select>
             </label>
             <label className="flex flex-col gap-1 text-sm">
-              Distribución
+              Distribuir (justify-content)
               <select className={inp()} value={cfg.justify ?? "center"} onChange={(e) => set("justify", e.target.value)}>
                 <option value="start">Inicio</option>
                 <option value="center">Centro</option>
@@ -656,8 +686,8 @@ type Props = {
 export function PageBlocksEditor({ blocks, onChange }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [showAddMenu, setShowAddMenu] = useState(false);
-  // Stable DnD keys per block — generated once and kept in sync with the blocks array
-  const [dndKeys] = useState<string[]>(() =>
+  // Stable DnD keys per block — must use setState to give SortableContext a new array ref on reorder
+  const [dndKeys, setDndKeys] = useState<string[]>(() =>
     blocks.map((b) => b.id ?? crypto.randomUUID()),
   );
 
@@ -683,16 +713,14 @@ export function PageBlocksEditor({ blocks, onChange }: Props) {
     const newIndex = dndKeys.indexOf(over.id as string);
     if (oldIndex === -1 || newIndex === -1) return;
 
-    const newKeys = arrayMove(dndKeys, oldIndex, newIndex);
-    dndKeys.splice(0, dndKeys.length, ...newKeys);
-
+    setDndKeys(arrayMove(dndKeys, oldIndex, newIndex));
     onChange(
       arrayMove(blocks, oldIndex, newIndex).map((b, i) => ({ ...b, display_order: i })),
     );
   }
 
   function remove(index: number) {
-    dndKeys.splice(index, 1);
+    setDndKeys(dndKeys.filter((_, i) => i !== index));
     onChange(blocks.filter((_, i) => i !== index).map((b, i) => ({ ...b, display_order: i })));
   }
 
@@ -710,7 +738,7 @@ export function PageBlocksEditor({ blocks, onChange }: Props) {
 
   function addBlock(type: BlockType) {
     const newKey = crypto.randomUUID();
-    dndKeys.push(newKey);
+    setDndKeys([...dndKeys, newKey]);
     const newBlock: PageBlock = {
       block_type: type,
       config: defaultConfig(type),

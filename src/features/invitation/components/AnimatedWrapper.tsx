@@ -40,7 +40,7 @@ export function AnimatedWrapper({ animation, children }: Props) {
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: true, margin: "0px 0px -30% 0px" }}
       variants={variants[animation]}
       transition={{ duration: 0.55, ease: "easeOut" }}
     >
