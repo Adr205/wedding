@@ -60,7 +60,7 @@ export function GalleryManager({ items, onChange }: GalleryManagerProps) {
       if (result.status === "fulfilled") {
         newItems.push({
           image_url: result.value,
-          caption: fileArr[i]!.name.replace(/\.[^.]+$/, ""),
+          caption: "",
           display_order: items.length + newItems.length,
         });
       } else {
