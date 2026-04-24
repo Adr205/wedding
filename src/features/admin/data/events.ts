@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/serviceClient";
 import { eventFormSchema, type EventFormInput } from "@/lib/validation/eventSchemas";
 
 const EVENT_SELECT = "id, slug, event_type, title, honoree_names, main_date, timezone, is_published";
@@ -15,15 +16,13 @@ export async function listEvents(ownerId: string, superAdmin = false) {
   return data ?? [];
 }
 
-export async function getEventBundle(eventId: string, ownerId: string) {
-  const supabase = await createClient();
+export async function getEventBundle(eventId: string, ownerId: string, superAdmin = false) {
+  const supabase = superAdmin ? createServiceClient() : await createClient();
 
-  const { data: event } = await supabase
-    .from("events")
-    .select(EVENT_SELECT)
-    .eq("id", eventId)
-    .eq("owner_id", ownerId)
-    .single();
+  let query = supabase.from("events").select(EVENT_SELECT).eq("id", eventId);
+  if (!superAdmin) query = query.eq("owner_id", ownerId);
+
+  const { data: event } = await query.single();
   if (!event) return null;
 
   const [{ data: theme }, { data: sections }, { data: gallery }, { data: schedule }, { data: locations }, { data: rsvp }] =
@@ -60,17 +59,17 @@ export async function getEventBundle(eventId: string, ownerId: string) {
   };
 }
 
-export async function saveEventBundle(ownerId: string, payload: unknown, eventId?: string) {
+export async function saveEventBundle(ownerId: string, payload: unknown, eventId?: string, superAdmin = false) {
   const parsed = eventFormSchema.safeParse(payload);
   if (!parsed.success) {
     return { ok: false, message: "Datos inválidos", issues: parsed.error.flatten() };
   }
 
   const data = parsed.data;
-  const supabase = await createClient();
+  // Super admin uses service client to bypass RLS when editing other users' events
+  const supabase = (eventId && superAdmin) ? createServiceClient() : await createClient();
 
-  const baseEvent = {
-    owner_id: ownerId,
+  const eventFields = {
     slug: data.slug,
     event_type: data.event_type,
     title: data.title,
@@ -80,9 +79,15 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
     is_published: data.is_published,
   };
 
-  const upsertEvent = eventId
-    ? await supabase.from("events").update(baseEvent).eq("id", eventId).eq("owner_id", ownerId).select("id").single()
-    : await supabase.from("events").insert(baseEvent).select("id").single();
+  let upsertEvent;
+  if (eventId) {
+    // On update, never overwrite owner_id; skip owner filter for super admin
+    let q = supabase.from("events").update(eventFields).eq("id", eventId);
+    if (!superAdmin) q = q.eq("owner_id", ownerId);
+    upsertEvent = await q.select("id").single();
+  } else {
+    upsertEvent = await supabase.from("events").insert({ ...eventFields, owner_id: ownerId }).select("id").single();
+  }
 
   if (upsertEvent.error || !upsertEvent.data) {
     return { ok: false, message: upsertEvent.error?.message ?? "No se pudo guardar el evento" };
@@ -131,18 +136,19 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
   return { ok: true, eventId: savedEventId };
 }
 
-export async function listEventGuests(eventId: string, ownerId: string) {
-  const supabase = await createClient();
+export async function listEventGuests(eventId: string, ownerId: string, superAdmin = false) {
+  const supabase = superAdmin ? createServiceClient() : await createClient();
 
-  // Verify ownership first
-  const { data: event } = await supabase
-    .from("events")
-    .select("id")
-    .eq("id", eventId)
-    .eq("owner_id", ownerId)
-    .single();
-
-  if (!event) return [];
+  if (!superAdmin) {
+    // Verify ownership for regular admins
+    const { data: event } = await supabase
+      .from("events")
+      .select("id")
+      .eq("id", eventId)
+      .eq("owner_id", ownerId)
+      .single();
+    if (!event) return [];
+  }
 
   const { data } = await supabase
     .from("event_guests")

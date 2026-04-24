@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageUser } from "@/lib/auth/requireUser";
+import { getMyRole, isSuperAdmin } from "@/lib/auth/getRole";
 import { getInvitationPreview } from "@/features/admin/data/preview";
 import { InvitationRenderer } from "@/features/invitation/components/InvitationRenderer";
 
@@ -11,8 +12,10 @@ type PreviewPageProps = {
 export default async function EventPreviewPage({ params }: PreviewPageProps) {
   const user = await requirePageUser();
   const { id } = await params;
+  const role = await getMyRole(user.id);
+  const superAdmin = isSuperAdmin(role);
 
-  const invitation = await getInvitationPreview(id, user.id);
+  const invitation = await getInvitationPreview(id, user.id, superAdmin);
   if (!invitation) notFound();
 
   return (
