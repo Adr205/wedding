@@ -57,27 +57,6 @@ export default async function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      {/* Header */}
-      <header className="bg-white border-b border-zinc-200 px-6 py-4">
-        <div className="mx-auto max-w-5xl flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-rose-400">✦</span>
-            <span className="font-semibold tracking-wide text-stone-800">AvCenter</span>
-            <span className="text-xs text-stone-400 tracking-[0.2em] uppercase">Admin</span>
-          </div>
-          <nav className="flex items-center gap-6">
-            <Link href="/admin/events" className="text-sm text-stone-500 hover:text-stone-900 transition-colors">
-              Eventos
-            </Link>
-            <form action="/api/auth/logout" method="post">
-              <button className="text-sm text-stone-500 hover:text-stone-900 transition-colors">
-                Cerrar sesión
-              </button>
-            </form>
-          </nav>
-        </div>
-      </header>
-
       <main className="mx-auto max-w-5xl px-6 py-10 space-y-8">
         {/* Title row */}
         {superAdmin ? (

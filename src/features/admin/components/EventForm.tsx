@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { availableThemes } from "@/features/themes/registry";
 import { GalleryManager, type GalleryItem } from "@/features/admin/components/GalleryManager";
 import { FontSelector } from "@/features/admin/components/FontSelector";
@@ -51,6 +53,7 @@ function toIsoOrNull(localValue: string) {
 }
 
 export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
+  const router = useRouter();
   const [status, setStatus] = useState<string>("");
 
   const [form, setForm] = useState(() => ({
@@ -126,18 +129,19 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
 
       if (!res.ok) {
         const data = (await res.json()) as { message?: string };
-        setStatus(data.message ?? "Error al guardar.");
+        const msg = data.message ?? "Error al guardar";
+        setStatus(msg);
+        toast.error(msg);
         return;
       }
 
-      const data = (await res.json()) as { eventId: string };
-      setStatus(`Guardado correctamente. ID: ${data.eventId}`);
+      toast.success(mode === "create" ? "Invitación creada correctamente" : "Cambios guardados correctamente");
+      router.push("/admin/events");
+      router.refresh();
     } catch (error) {
-      if (error instanceof Error) {
-        setStatus(error.message);
-        return;
-      }
-      setStatus("No se pudo guardar. Verifica los datos del formulario.");
+      const msg = error instanceof Error ? error.message : "No se pudo guardar. Verifica los datos.";
+      setStatus(msg);
+      toast.error(msg);
     }
   }
 
@@ -472,11 +476,21 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         ))}
       </section>
 
-      <button type="submit" className="rounded-xl bg-zinc-900 px-5 py-3 font-semibold text-white hover:bg-zinc-700">
-        {mode === "create" ? "Crear sitio de invitación" : "Guardar cambios"}
-      </button>
-
-      {status ? <p className="text-sm text-zinc-600 dark:text-zinc-300">{status}</p> : null}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <button
+          type="button"
+          onClick={() => router.push("/admin/events")}
+          className="rounded-xl border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors dark:border-zinc-600 dark:text-zinc-300"
+        >
+          ← Cancelar
+        </button>
+        <button
+          type="submit"
+          className="rounded-xl bg-zinc-900 px-6 py-3 font-semibold text-white hover:bg-zinc-700 transition-colors"
+        >
+          {mode === "create" ? "Crear invitación" : "Guardar cambios"}
+        </button>
+      </div>
     </form>
   );
 }

@@ -35,7 +35,7 @@ export default async function proxy(request: NextRequest) {
 
   // Redirect to events dashboard if user visits login while already authenticated
   if (user && pathname === "/admin/login") {
-    return NextResponse.redirect(new URL("/admin/events", request.url));
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   // Protect all /admin routes (except login itself)
