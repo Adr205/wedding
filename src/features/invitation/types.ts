@@ -1,3 +1,5 @@
+import type { PageBlock } from "@/features/invitation/types/blocks";
+
 export type EventType = "wedding" | "xv" | "other";
 
 export type EventRow = {
@@ -11,6 +13,30 @@ export type EventRow = {
   is_published: boolean;
 };
 
+export type EventTheme = {
+  theme_key: string;
+  palette?: Record<string, string>;
+  /** typography.heading stores the selected Google Font key, e.g. "Great Vibes" */
+  typography?: Record<string, string>;
+  block_config?: Record<string, boolean>;
+  background_image_url?: string | null;
+  default_background_key?: string | null;
+};
+
+export type EventRsvpSettings = {
+  whatsapp_number: string;
+  message_template: string;
+  enabled: boolean;
+};
+
+export type FullInvitation = {
+  event: EventRow;
+  theme: EventTheme;
+  blocks: PageBlock[];
+  rsvp: EventRsvpSettings;
+};
+
+// Legacy types kept for migration layer compatibility
 export type EventSection = {
   section_key: string;
   heading: string;
@@ -38,30 +64,4 @@ export type EventLocation = {
   maps_url?: string | null;
   starts_at?: string | null;
   display_order: number;
-};
-
-export type EventTheme = {
-  theme_key: string;
-  palette?: Record<string, string>;
-  /** typography.heading stores the selected Google Font key, e.g. "Great Vibes" */
-  typography?: Record<string, string>;
-  block_config?: Record<string, boolean>;
-  background_image_url?: string | null;
-  default_background_key?: string | null;
-};
-
-export type EventRsvpSettings = {
-  whatsapp_number: string;
-  message_template: string;
-  enabled: boolean;
-};
-
-export type FullInvitation = {
-  event: EventRow;
-  theme: EventTheme;
-  sections: EventSection[];
-  gallery: EventGalleryItem[];
-  schedule: EventScheduleItem[];
-  locations: EventLocation[];
-  rsvp: EventRsvpSettings;
 };

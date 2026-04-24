@@ -3,7 +3,6 @@ import { createServiceClient } from "@/lib/supabase/serviceClient";
 import { eventFormSchema, type EventFormInput } from "@/lib/validation/eventSchemas";
 
 const EVENT_SELECT = "id, slug, event_type, title, honoree_names, main_date, timezone, is_published";
-
 const EVENT_SELECT_WITH_OWNER = "id, slug, event_type, title, honoree_names, main_date, timezone, is_published, owner_id";
 
 export async function listEvents(ownerId: string, superAdmin = false) {
@@ -25,37 +24,33 @@ export async function getEventBundle(eventId: string, ownerId: string, superAdmi
   const { data: event } = await query.single();
   if (!event) return null;
 
-  const [{ data: theme }, { data: sections }, { data: gallery }, { data: schedule }, { data: locations }, { data: rsvp }] =
-    await Promise.all([
-      supabase.from("event_themes").select("theme_key, typography, background_image_url, default_background_key").eq("event_id", eventId).single(),
-      supabase.from("event_sections").select("section_key, heading, body, display_order").eq("event_id", eventId).order("display_order"),
-      supabase.from("event_gallery").select("image_url, caption, display_order").eq("event_id", eventId).order("display_order"),
-      supabase
-        .from("event_schedule")
-        .select("title, starts_at, ends_at, details, display_order")
-        .eq("event_id", eventId)
-        .order("display_order"),
-      supabase
-        .from("event_locations")
-        .select("label, address, maps_url, starts_at, display_order")
-        .eq("event_id", eventId)
-        .order("display_order"),
-      supabase
-        .from("event_rsvp_settings")
-        .select("whatsapp_number, message_template")
-        .eq("event_id", eventId)
-        .single(),
-    ]);
+  const [{ data: theme }, { data: blocks }, { data: rsvp }] = await Promise.all([
+    supabase
+      .from("event_themes")
+      .select("theme_key, typography, background_image_url, default_background_key")
+      .eq("event_id", eventId)
+      .single(),
+    supabase
+      .from("page_blocks")
+      .select("id, block_type, config, display_order, enabled")
+      .eq("event_id", eventId)
+      .order("display_order"),
+    supabase
+      .from("event_rsvp_settings")
+      .select("whatsapp_number, message_template")
+      .eq("event_id", eventId)
+      .single(),
+  ]);
 
   return {
     ...event,
     theme_key: theme?.theme_key ?? "elegant",
+    font_heading: (theme?.typography as Record<string, string> | null)?.heading ?? "Playfair Display",
+    background_image_url: theme?.background_image_url ?? null,
+    default_background_key: theme?.default_background_key ?? null,
     whatsapp_number: rsvp?.whatsapp_number ?? "",
     message_template: rsvp?.message_template ?? "Hola, confirmo mi asistencia a {{eventTitle}}.",
-    sections: sections ?? [],
-    gallery: gallery ?? [],
-    schedule: schedule ?? [],
-    locations: locations ?? [],
+    blocks: blocks ?? [],
   };
 }
 
@@ -66,7 +61,6 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
   }
 
   const data = parsed.data;
-  // Super admin uses service client to bypass RLS when editing other users' events
   const supabase = (eventId && superAdmin) ? createServiceClient() : await createClient();
 
   const eventFields = {
@@ -81,12 +75,15 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
 
   let upsertEvent;
   if (eventId) {
-    // On update, never overwrite owner_id; skip owner filter for super admin
     let q = supabase.from("events").update(eventFields).eq("id", eventId);
     if (!superAdmin) q = q.eq("owner_id", ownerId);
     upsertEvent = await q.select("id").single();
   } else {
-    upsertEvent = await supabase.from("events").insert({ ...eventFields, owner_id: ownerId }).select("id").single();
+    upsertEvent = await supabase
+      .from("events")
+      .insert({ ...eventFields, owner_id: ownerId })
+      .select("id")
+      .single();
   }
 
   if (upsertEvent.error || !upsertEvent.data) {
@@ -103,34 +100,27 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
       background_image_url: data.background_image_url ?? null,
       default_background_key: data.default_background_key ?? null,
     }),
-    supabase
-      .from("event_rsvp_settings")
-      .upsert({
+    supabase.from("event_rsvp_settings").upsert({
+      event_id: savedEventId,
+      whatsapp_number: data.whatsapp_number,
+      message_template: data.message_template,
+      enabled: true,
+    }),
+  ]);
+
+  // Delete + reinsert page_blocks
+  await supabase.from("page_blocks").delete().eq("event_id", savedEventId);
+
+  if (data.blocks.length > 0) {
+    await supabase.from("page_blocks").insert(
+      data.blocks.map((block, i) => ({
         event_id: savedEventId,
-        whatsapp_number: data.whatsapp_number,
-        message_template: data.message_template,
-        enabled: true,
-      }),
-  ]);
-
-  await Promise.all([
-    supabase.from("event_sections").delete().eq("event_id", savedEventId),
-    supabase.from("event_gallery").delete().eq("event_id", savedEventId),
-    supabase.from("event_schedule").delete().eq("event_id", savedEventId),
-    supabase.from("event_locations").delete().eq("event_id", savedEventId),
-  ]);
-
-  if (data.sections.length > 0) {
-    await supabase.from("event_sections").insert(data.sections.map((item) => ({ ...item, event_id: savedEventId })));
-  }
-  if (data.gallery.length > 0) {
-    await supabase.from("event_gallery").insert(data.gallery.map((item) => ({ ...item, event_id: savedEventId })));
-  }
-  if (data.schedule.length > 0) {
-    await supabase.from("event_schedule").insert(data.schedule.map((item) => ({ ...item, event_id: savedEventId })));
-  }
-  if (data.locations.length > 0) {
-    await supabase.from("event_locations").insert(data.locations.map((item) => ({ ...item, event_id: savedEventId })));
+        block_type: block.block_type,
+        config: block.config,
+        display_order: i,
+        enabled: block.enabled,
+      })),
+    );
   }
 
   return { ok: true, eventId: savedEventId };
@@ -140,7 +130,6 @@ export async function listEventGuests(eventId: string, ownerId: string, superAdm
   const supabase = superAdmin ? createServiceClient() : await createClient();
 
   if (!superAdmin) {
-    // Verify ownership for regular admins
     const { data: event } = await supabase
       .from("events")
       .select("id")
@@ -174,9 +163,11 @@ export function getDraftEventDefaults(): EventFormInput {
     default_background_key: null,
     whatsapp_number: "52",
     message_template: "Hola, confirmo mi asistencia a {{eventTitle}}.",
-    sections: [],
-    gallery: [],
-    schedule: [],
-    locations: [],
+    blocks: [
+      { block_type: "hero", config: {}, display_order: 0, enabled: true },
+      { block_type: "countdown", config: { style: "numbers" }, display_order: 10, enabled: true },
+      { block_type: "divider", config: { style: "ornament" }, display_order: 20, enabled: true },
+      { block_type: "rsvp", config: {}, display_order: 30, enabled: true },
+    ],
   };
 }

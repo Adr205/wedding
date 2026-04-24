@@ -4,9 +4,10 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { availableThemes } from "@/features/themes/registry";
-import { GalleryManager, type GalleryItem } from "@/features/admin/components/GalleryManager";
 import { FontSelector } from "@/features/admin/components/FontSelector";
 import { BackgroundSelector } from "@/features/admin/components/BackgroundSelector";
+import { PageBlocksEditor } from "@/features/admin/components/PageBlocksEditor";
+import type { PageBlock } from "@/features/invitation/types/blocks";
 
 type EventFormProps = {
   mode: "create" | "edit";
@@ -14,42 +15,8 @@ type EventFormProps = {
   initialValues: Record<string, unknown>;
 };
 
-type SectionItem = {
-  section_key: string;
-  heading: string;
-  body: string;
-  display_order: number;
-};
-
-type ScheduleItem = {
-  title: string;
-  starts_at: string;
-  ends_at?: string | null;
-  details?: string | null;
-  display_order: number;
-};
-
-type LocationItem = {
-  label: string;
-  address: string;
-  maps_url?: string | null;
-  starts_at?: string | null;
-  display_order: number;
-};
-
 function ensureArray<T>(input: unknown): T[] {
   return Array.isArray(input) ? (input as T[]) : [];
-}
-
-function toDateTimeLocalValue(isoDate: string) {
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 16);
-}
-
-function toIsoOrNull(localValue: string) {
-  if (!localValue) return null;
-  return new Date(localValue).toISOString();
 }
 
 export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
@@ -69,11 +36,10 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
     background_image_url: (initialValues.background_image_url as string | null) ?? null,
     default_background_key: (initialValues.default_background_key as string | null) ?? null,
     whatsapp_number: String(initialValues.whatsapp_number ?? "52"),
-    message_template: String(initialValues.message_template ?? "Hola, confirmo mi asistencia a {{eventTitle}}."),
-    sections: ensureArray<SectionItem>(initialValues.sections),
-    gallery: ensureArray<GalleryItem>(initialValues.gallery),
-    schedule: ensureArray<ScheduleItem>(initialValues.schedule),
-    locations: ensureArray<LocationItem>(initialValues.locations),
+    message_template: String(
+      initialValues.message_template ?? "Hola, confirmo mi asistencia a {{eventTitle}}.",
+    ),
+    blocks: ensureArray<PageBlock>(initialValues.blocks),
   }));
 
   const endpoint = useMemo(() => {
@@ -100,25 +66,7 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         default_background_key: form.default_background_key || null,
         whatsapp_number: form.whatsapp_number,
         message_template: form.message_template,
-        sections: form.sections.map((item, index) => ({
-          ...item,
-          display_order: index,
-        })),
-        gallery: form.gallery.map((item, index) => ({
-          ...item,
-          display_order: index,
-        })),
-        schedule: form.schedule.map((item, index) => ({
-          ...item,
-          starts_at: new Date(item.starts_at).toISOString(),
-          ends_at: item.ends_at ? new Date(item.ends_at).toISOString() : null,
-          display_order: index,
-        })),
-        locations: form.locations.map((item, index) => ({
-          ...item,
-          starts_at: item.starts_at ? new Date(item.starts_at).toISOString() : null,
-          display_order: index,
-        })),
+        blocks: form.blocks.map((block, i) => ({ ...block, display_order: i })),
       };
 
       const res = await fetch(endpoint, {
@@ -135,11 +83,14 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         return;
       }
 
-      toast.success(mode === "create" ? "Invitación creada correctamente" : "Cambios guardados correctamente");
+      toast.success(
+        mode === "create" ? "Invitación creada correctamente" : "Cambios guardados correctamente",
+      );
       router.push("/admin/events");
       router.refresh();
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "No se pudo guardar. Verifica los datos.";
+      const msg =
+        error instanceof Error ? error.message : "No se pudo guardar. Verifica los datos.";
       setStatus(msg);
       toast.error(msg);
     }
@@ -150,15 +101,25 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
       onSubmit={onSubmit}
       className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
     >
+      {/* ── Datos del evento ───────────────────────────── */}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-sm">
           Slug
-          <input className="rounded-lg border border-zinc-300 p-2" value={form.slug} onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))} required />
+          <input
+            className="rounded-lg border border-zinc-300 p-2"
+            value={form.slug}
+            onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
+            required
+          />
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
           Tipo de evento
-          <select className="rounded-lg border border-zinc-300 p-2" value={form.event_type} onChange={(e) => setForm((prev) => ({ ...prev, event_type: e.target.value }))}>
+          <select
+            className="rounded-lg border border-zinc-300 p-2"
+            value={form.event_type}
+            onChange={(e) => setForm((prev) => ({ ...prev, event_type: e.target.value }))}
+          >
             <option value="wedding">Boda</option>
             <option value="xv">XV Años</option>
             <option value="other">Otro</option>
@@ -167,12 +128,22 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
 
         <label className="flex flex-col gap-1 text-sm">
           Título del evento
-          <input className="rounded-lg border border-zinc-300 p-2" value={form.title} onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))} required />
+          <input
+            className="rounded-lg border border-zinc-300 p-2"
+            value={form.title}
+            onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+            required
+          />
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
           Novios / Festejada
-          <input className="rounded-lg border border-zinc-300 p-2" value={form.honoree_names} onChange={(e) => setForm((prev) => ({ ...prev, honoree_names: e.target.value }))} required />
+          <input
+            className="rounded-lg border border-zinc-300 p-2"
+            value={form.honoree_names}
+            onChange={(e) => setForm((prev) => ({ ...prev, honoree_names: e.target.value }))}
+            required
+          />
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
@@ -181,14 +152,20 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
             type="datetime-local"
             className="rounded-lg border border-zinc-300 p-2"
             value={new Date(form.main_date).toISOString().slice(0, 16)}
-            onChange={(e) => setForm((prev) => ({ ...prev, main_date: new Date(e.target.value).toISOString() }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, main_date: new Date(e.target.value).toISOString() }))
+            }
             required
           />
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
           Tema visual
-          <select className="rounded-lg border border-zinc-300 p-2" value={form.theme_key} onChange={(e) => setForm((prev) => ({ ...prev, theme_key: e.target.value }))}>
+          <select
+            className="rounded-lg border border-zinc-300 p-2"
+            value={form.theme_key}
+            onChange={(e) => setForm((prev) => ({ ...prev, theme_key: e.target.value }))}
+          >
             {availableThemes.map((theme) => (
               <option key={theme.key} value={theme.key}>
                 {theme.name}
@@ -198,7 +175,10 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         </label>
       </div>
 
-      <FontSelector value={form.font_heading} onChange={(key) => setForm((prev) => ({ ...prev, font_heading: key }))} />
+      <FontSelector
+        value={form.font_heading}
+        onChange={(key) => setForm((prev) => ({ ...prev, font_heading: key }))}
+      />
 
       <BackgroundSelector
         backgroundImageUrl={form.background_image_url}
@@ -207,275 +187,47 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         onChangeCustomUrl={(url) => setForm((prev) => ({ ...prev, background_image_url: url || null }))}
       />
 
+      {/* ── RSVP config ────────────────────────────────── */}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-sm">
-          Número WhatsApp destino
-          <input className="rounded-lg border border-zinc-300 p-2" value={form.whatsapp_number} onChange={(e) => setForm((prev) => ({ ...prev, whatsapp_number: e.target.value }))} />
+          Número WhatsApp (RSVP)
+          <input
+            className="rounded-lg border border-zinc-300 p-2"
+            value={form.whatsapp_number}
+            onChange={(e) => setForm((prev) => ({ ...prev, whatsapp_number: e.target.value }))}
+          />
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
           Publicado
-          <input type="checkbox" checked={form.is_published} onChange={(e) => setForm((prev) => ({ ...prev, is_published: e.target.checked }))} />
+          <div className="flex items-center gap-2 pt-2">
+            <input
+              type="checkbox"
+              checked={form.is_published}
+              onChange={(e) => setForm((prev) => ({ ...prev, is_published: e.target.checked }))}
+              className="w-4 h-4"
+            />
+            <span className="text-sm text-zinc-500">Visible para invitados</span>
+          </div>
         </label>
       </div>
 
       <label className="flex flex-col gap-1 text-sm">
         Plantilla de mensaje WhatsApp
-        <textarea className="min-h-20 rounded-lg border border-zinc-300 p-2" value={form.message_template} onChange={(e) => setForm((prev) => ({ ...prev, message_template: e.target.value }))} />
+        <textarea
+          className="min-h-20 rounded-lg border border-zinc-300 p-2"
+          value={form.message_template}
+          onChange={(e) => setForm((prev) => ({ ...prev, message_template: e.target.value }))}
+        />
       </label>
 
-      <section className="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Secciones de contenido</h3>
-          <button
-            type="button"
-            className="rounded-lg border border-zinc-300 px-3 py-1 text-sm hover:bg-zinc-100"
-            onClick={() =>
-              setForm((prev) => ({
-                ...prev,
-                sections: [
-                  ...prev.sections,
-                  {
-                    section_key: `seccion-${prev.sections.length + 1}`,
-                    heading: "",
-                    body: "",
-                    display_order: prev.sections.length,
-                  },
-                ],
-              }))
-            }
-          >
-            Agregar sección
-          </button>
-        </div>
-        {form.sections.length === 0 ? <p className="text-sm text-zinc-500 dark:text-zinc-400">No hay secciones aún.</p> : null}
-        {form.sections.map((section, index) => (
-          <div
-            key={`${section.section_key}-${index}`}
-            className="grid gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3 md:grid-cols-3 dark:border-zinc-700 dark:bg-zinc-800"
-          >
-            <input
-              className="rounded-md border border-zinc-300 p-2 text-sm"
-              placeholder="Clave (ej. bienvenida)"
-              value={section.section_key}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  sections: prev.sections.map((item, idx) => (idx === index ? { ...item, section_key: e.target.value } : item)),
-                }))
-              }
-            />
-            <input
-              className="rounded-md border border-zinc-300 p-2 text-sm"
-              placeholder="Título"
-              value={section.heading}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  sections: prev.sections.map((item, idx) => (idx === index ? { ...item, heading: e.target.value } : item)),
-                }))
-              }
-            />
-            <button
-              type="button"
-              className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100"
-              onClick={() =>
-                setForm((prev) => ({
-                  ...prev,
-                  sections: prev.sections.filter((_, idx) => idx !== index),
-                }))
-              }
-            >
-              Quitar
-            </button>
-            <textarea
-              className="rounded-md border border-zinc-300 p-2 text-sm md:col-span-3"
-              placeholder="Texto de la sección"
-              value={section.body}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  sections: prev.sections.map((item, idx) => (idx === index ? { ...item, body: e.target.value } : item)),
-                }))
-              }
-            />
-          </div>
-        ))}
-      </section>
+      {/* ── Bloques de la página ─────────────────────────── */}
+      <PageBlocksEditor
+        blocks={form.blocks}
+        onChange={(blocks) => setForm((prev) => ({ ...prev, blocks }))}
+      />
 
-      <GalleryManager items={form.gallery} onChange={(gallery) => setForm((prev) => ({ ...prev, gallery }))} />
-
-      <section className="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Agenda</h3>
-          <button
-            type="button"
-            className="rounded-lg border border-zinc-300 px-3 py-1 text-sm hover:bg-zinc-100"
-            onClick={() =>
-              setForm((prev) => ({
-                ...prev,
-                schedule: [
-                  ...prev.schedule,
-                  {
-                    title: "",
-                    starts_at: new Date().toISOString(),
-                    ends_at: null,
-                    details: "",
-                    display_order: prev.schedule.length,
-                  },
-                ],
-              }))
-            }
-          >
-            Agregar momento
-          </button>
-        </div>
-        {form.schedule.length === 0 ? <p className="text-sm text-zinc-500 dark:text-zinc-400">No hay momentos cargados.</p> : null}
-        {form.schedule.map((item, index) => (
-          <div
-            key={`${item.title}-${index}`}
-            className="grid gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3 md:grid-cols-2 dark:border-zinc-700 dark:bg-zinc-800"
-          >
-            <input
-              className="rounded-md border border-zinc-300 p-2 text-sm"
-              placeholder="Título (ej. Ceremonia)"
-              value={item.title}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  schedule: prev.schedule.map((s, idx) => (idx === index ? { ...s, title: e.target.value } : s)),
-                }))
-              }
-            />
-            <button
-              type="button"
-              className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100"
-              onClick={() =>
-                setForm((prev) => ({
-                  ...prev,
-                  schedule: prev.schedule.filter((_, idx) => idx !== index),
-                }))
-              }
-            >
-              Quitar
-            </button>
-            <input
-              type="datetime-local"
-              className="rounded-md border border-zinc-300 p-2 text-sm"
-              value={toDateTimeLocalValue(item.starts_at)}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  schedule: prev.schedule.map((s, idx) => (idx === index ? { ...s, starts_at: toIsoOrNull(e.target.value) ?? s.starts_at } : s)),
-                }))
-              }
-            />
-            <input
-              type="datetime-local"
-              className="rounded-md border border-zinc-300 p-2 text-sm"
-              value={toDateTimeLocalValue(item.ends_at ?? "")}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  schedule: prev.schedule.map((s, idx) => (idx === index ? { ...s, ends_at: toIsoOrNull(e.target.value) } : s)),
-                }))
-              }
-            />
-            <textarea
-              className="rounded-md border border-zinc-300 p-2 text-sm md:col-span-2"
-              placeholder="Detalles opcionales"
-              value={item.details ?? ""}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  schedule: prev.schedule.map((s, idx) => (idx === index ? { ...s, details: e.target.value } : s)),
-                }))
-              }
-            />
-          </div>
-        ))}
-      </section>
-
-      <section className="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Ubicaciones</h3>
-          <button
-            type="button"
-            className="rounded-lg border border-zinc-300 px-3 py-1 text-sm hover:bg-zinc-100"
-            onClick={() =>
-              setForm((prev) => ({
-                ...prev,
-                locations: [
-                  ...prev.locations,
-                  {
-                    label: "",
-                    address: "",
-                    maps_url: "",
-                    starts_at: null,
-                    display_order: prev.locations.length,
-                  },
-                ],
-              }))
-            }
-          >
-            Agregar ubicación
-          </button>
-        </div>
-        {form.locations.length === 0 ? <p className="text-sm text-zinc-500 dark:text-zinc-400">No hay ubicaciones cargadas.</p> : null}
-        {form.locations.map((location, index) => (
-          <div
-            key={`${location.label}-${index}`}
-            className="grid gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3 md:grid-cols-2 dark:border-zinc-700 dark:bg-zinc-800"
-          >
-            <input
-              className="rounded-md border border-zinc-300 p-2 text-sm"
-              placeholder="Etiqueta (ej. Recepción)"
-              value={location.label}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  locations: prev.locations.map((item, idx) => (idx === index ? { ...item, label: e.target.value } : item)),
-                }))
-              }
-            />
-            <button
-              type="button"
-              className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100"
-              onClick={() =>
-                setForm((prev) => ({
-                  ...prev,
-                  locations: prev.locations.filter((_, idx) => idx !== index),
-                }))
-              }
-            >
-              Quitar
-            </button>
-            <input
-              className="rounded-md border border-zinc-300 p-2 text-sm md:col-span-2"
-              placeholder="Dirección"
-              value={location.address}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  locations: prev.locations.map((item, idx) => (idx === index ? { ...item, address: e.target.value } : item)),
-                }))
-              }
-            />
-            <input
-              className="rounded-md border border-zinc-300 p-2 text-sm md:col-span-2"
-              placeholder="URL de Google Maps"
-              value={location.maps_url ?? ""}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  locations: prev.locations.map((item, idx) => (idx === index ? { ...item, maps_url: e.target.value } : item)),
-                }))
-              }
-            />
-          </div>
-        ))}
-      </section>
-
+      {/* ── Actions ────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <button
           type="button"
@@ -484,12 +236,17 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         >
           ← Cancelar
         </button>
-        <button
-          type="submit"
-          className="rounded-xl bg-zinc-900 px-6 py-3 font-semibold text-white hover:bg-zinc-700 transition-colors"
-        >
-          {mode === "create" ? "Crear invitación" : "Guardar cambios"}
-        </button>
+        <div className="flex items-center gap-3">
+          {status && !status.startsWith("Guard") ? (
+            <p className="text-sm text-rose-600">{status}</p>
+          ) : null}
+          <button
+            type="submit"
+            className="rounded-xl bg-zinc-900 px-6 py-3 font-semibold text-white hover:bg-zinc-700 transition-colors"
+          >
+            {mode === "create" ? "Crear invitación" : "Guardar cambios"}
+          </button>
+        </div>
       </div>
     </form>
   );
