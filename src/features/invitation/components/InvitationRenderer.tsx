@@ -21,6 +21,11 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
     "Playfair Display";
   const fontFamily = `'${fontKey}', Georgia, serif`;
 
+  // Palette color overrides
+  const palette = invitation.theme.palette as Record<string, string> | undefined;
+  const textColor = palette?.text || undefined;
+  const cardBg = palette?.card_bg || undefined;
+
   const ctx: RenderContext = {
     event: invitation.event,
     theme: invitation.theme,
@@ -29,6 +34,8 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
     fontFamily,
     rsvp: invitation.rsvp,
     invitation,
+    textColor,
+    cardBg,
   };
 
   const visibleBlocks = [...invitation.blocks]
@@ -39,14 +46,18 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
     <main
       className={`min-h-screen ${bgUrl ? theme.textClassName : theme.className} relative`}
       style={
-        bgUrl
-          ? {
-              backgroundImage: `url(${bgUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundAttachment: "fixed",
-            }
-          : undefined
+        {
+          ...(bgUrl
+            ? {
+                backgroundImage: `url(${bgUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundAttachment: "fixed",
+              }
+            : {}),
+          ...(textColor ? { color: textColor } : {}),
+          "--inv-card": cardBg || "rgba(255,255,255,0.4)",
+        } as React.CSSProperties
       }
     >
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
@@ -57,10 +68,14 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
       ) : null}
 
       {visibleBlocks.map((block) => (
-        <BlockRenderer key={block.id ?? `${block.block_type}-${block.display_order}`} block={block} ctx={ctx} />
+        <BlockRenderer
+          key={block.id ?? `${block.block_type}-${block.display_order}`}
+          block={block}
+          ctx={ctx}
+        />
       ))}
 
-      {/* ── Footer — always shown ─────────────────────────── */}
+      {/* ── Footer — always shown ───────────────────────── */}
       <div className="px-6 pb-16 text-center">
         <DividerBlock config={{ style: "ornament" }} />
         <a
@@ -74,16 +89,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
           rel="noreferrer"
           className="inline-flex items-center justify-center gap-2 rounded-full border border-current px-6 py-3 text-sm font-semibold opacity-60 hover:opacity-80 transition-opacity mb-10"
         >
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
             <line x1="16" y1="2" x2="16" y2="6" />
             <line x1="8" y1="2" x2="8" y2="6" />

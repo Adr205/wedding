@@ -9,7 +9,7 @@ export function GiftRegistryBlock({ config, ctx }: Props) {
 
   return (
     <section className="px-6 py-6 max-w-2xl mx-auto text-center">
-      <div className="rounded-2xl bg-white/40 backdrop-blur-sm p-6">
+      <div className="rounded-2xl backdrop-blur-sm p-6" style={{ background: "var(--inv-card, rgba(255,255,255,0.4))" }}>
         <p className="text-xs tracking-[0.3em] uppercase opacity-40 mb-2">
           {config.title || "Mesa de regalos"}
         </p>
