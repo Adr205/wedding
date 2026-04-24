@@ -171,9 +171,20 @@ function ConfigPanel({
   switch (block.block_type) {
     case "hero":
       return (
-        <p className="text-xs text-zinc-400">
-          El encabezado usa el título, nombres y fecha configurados en la sección superior.
-        </p>
+        <div className="space-y-2">
+          <p className="text-xs text-zinc-400">
+            El encabezado usa el título, nombres y fecha configurados en la sección superior.
+          </p>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={cfg.show_date_pill !== false}
+              onChange={(e) => set("show_date_pill", e.target.checked)}
+              className="rounded"
+            />
+            Mostrar fecha como pastilla
+          </label>
+        </div>
       );
 
     case "countdown":

@@ -10,7 +10,7 @@ const pageBlockSchema = z.object({
   config: z.record(z.string(), z.unknown()),
   display_order: z.number().int().nonnegative().default(0),
   enabled: z.boolean().default(true),
-  animation: z.enum(["none", "fade", "slide-up", "slide-left", "slide-right", "zoom"]).optional(),
+  animation: z.enum(["none", "fade", "slide-up", "slide-left", "slide-right", "zoom"]).nullish(),
 });
 
 export const eventFormSchema = z.object({

@@ -125,6 +125,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
 };
 
 export const ADDABLE_BLOCK_TYPES: BlockType[] = [
+  "hero",
   "text",
   "quote",
   "photo",
