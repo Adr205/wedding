@@ -17,21 +17,6 @@ export default async function AdminEventsPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <header className="bg-white border-b border-zinc-200 px-6 py-4">
-        <div className="mx-auto max-w-5xl flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-rose-400">✦</span>
-            <span className="font-semibold tracking-wide text-stone-800">AvCenter</span>
-            <span className="text-xs text-stone-400 tracking-[0.2em] uppercase">Admin</span>
-          </div>
-          <form action="/api/auth/logout" method="post">
-            <button className="text-sm text-stone-500 hover:text-stone-900 transition-colors">
-              Cerrar sesión
-            </button>
-          </form>
-        </div>
-      </header>
-
       <main className="mx-auto max-w-5xl px-6 py-10">
         {superAdmin ? (
           <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 mb-6">
