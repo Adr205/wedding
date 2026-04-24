@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/serviceClient";
 
 export type DashboardStats = {
   totalEvents: number;
@@ -40,9 +41,12 @@ export async function getDashboardStats(ownerId: string, superAdmin = false): Pr
 
   if (!superAdmin) eventsQuery = eventsQuery.eq("owner_id", ownerId);
 
+  // Super admin bypasses RLS to read guests from all events
+  const guestClient = superAdmin ? createServiceClient() : supabase;
+
   const [{ data: events }, { data: guests }] = await Promise.all([
     eventsQuery,
-    supabase
+    guestClient
       .from("event_guests")
       .select("id, event_id, guest_name, plus_ones, confirmation_status, created_at")
       .eq("confirmation_status", "confirmed")

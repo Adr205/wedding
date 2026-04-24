@@ -1,16 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/serviceClient";
 import type { FullInvitation } from "@/features/invitation/types";
 
 /** Like getInvitationBySlug but fetches by event id (owner-gated, works for drafts) */
-export async function getInvitationPreview(eventId: string, ownerId: string): Promise<FullInvitation | null> {
-  const supabase = await createClient();
+export async function getInvitationPreview(eventId: string, ownerId: string, superAdmin = false): Promise<FullInvitation | null> {
+  const supabase = superAdmin ? createServiceClient() : await createClient();
 
-  const { data: event } = await supabase
+  let query = supabase
     .from("events")
     .select("id, slug, event_type, title, honoree_names, main_date, timezone, is_published")
-    .eq("id", eventId)
-    .eq("owner_id", ownerId)
-    .single();
+    .eq("id", eventId);
+  if (!superAdmin) query = query.eq("owner_id", ownerId);
+
+  const { data: event } = await query.single();
 
   if (!event) return null;
 
