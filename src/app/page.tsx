@@ -1,8 +1,97 @@
 import Link from "next/link";
 
+const FEATURES = [
+  {
+    icon: "🧩",
+    title: "Editor de bloques",
+    desc: "Construye la invitación arrastrando y soltando bloques. Sin código, sin límites.",
+  },
+  {
+    icon: "✨",
+    title: "Animaciones por bloque",
+    desc: "Cada sección puede entrar con fade, slide o zoom al hacer scroll. Ajustable por bloque.",
+  },
+  {
+    icon: "🎨",
+    title: "Temas y colores propios",
+    desc: "Elige el tema visual, color del texto y fondo de cards — con efecto de vidrio incluido.",
+  },
+  {
+    icon: "📸",
+    title: "Galería con subida masiva",
+    desc: "Sube decenas de fotos de golpe. Visualización en cuadrícula o carrusel.",
+  },
+  {
+    icon: "🎬",
+    title: "Video embed",
+    desc: "Inserta cualquier video de YouTube o Vimeo directamente en la invitación.",
+  },
+  {
+    icon: "📍",
+    title: "Mapas integrados",
+    desc: "Mapa de Google embebido por cada lugar. Botón directo para abrir en Maps.",
+  },
+  {
+    icon: "📅",
+    title: "Itinerario del evento",
+    desc: "Detalla cada momento del día con hora y descripción en una línea de tiempo elegante.",
+  },
+  {
+    icon: "💬",
+    title: "RSVP por WhatsApp",
+    desc: "Confirmación de asistencia con mensaje personalizable directo a WhatsApp.",
+  },
+  {
+    icon: "⏱️",
+    title: "Cuenta regresiva",
+    desc: "Contador en tiempo real hasta el gran día. Estilo numérico o minimalista.",
+  },
+  {
+    icon: "👗",
+    title: "Código de vestimenta",
+    desc: "Sección dedicada con paleta de colores sugeridos para los invitados.",
+  },
+  {
+    icon: "🎁",
+    title: "Mesa de regalos",
+    desc: "Lista de tiendas con links directos. Liverpool, Amazon, o cualquier URL.",
+  },
+  {
+    icon: "⚡",
+    title: "Grid y Flex containers",
+    desc: "Agrupa bloques en cuadrículas o filas flexibles para layouts completamente libres.",
+  },
+];
+
+const BLOCK_TYPES = [
+  "Hero", "Cuenta regresiva", "Cita / Frase", "Texto",
+  "Foto única", "Galería", "Video", "Itinerario",
+  "Ubicación", "RSVP", "Separador", "Código de vestimenta",
+  "Mesa de regalos", "Grid", "Flex",
+];
+
+const STEPS = [
+  {
+    num: "01",
+    title: "Crea el evento",
+    desc: "Define el nombre, fecha, tema visual y paleta de colores.",
+  },
+  {
+    num: "02",
+    title: "Construye la página",
+    desc: "Agrega bloques, reordénalos con drag & drop y configura cada sección.",
+  },
+  {
+    num: "03",
+    title: "Comparte el link",
+    desc: "Copia la URL y envíala por WhatsApp, Instagram o donde quieras.",
+  },
+];
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-white text-stone-900">
+
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md border-b border-rose-100/60">
         <div className="flex items-center gap-2">
@@ -18,7 +107,7 @@ export default function Home() {
         </Link>
       </nav>
 
-      {/* Hero */}
+      {/* ── Hero ─────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-32 pb-24 px-6">
         <div className="absolute inset-0 bg-gradient-to-br from-rose-50 via-white to-fuchsia-50/50" />
         <div className="absolute top-0 right-0 w-[700px] h-[700px] rounded-full bg-rose-100/20 blur-3xl -translate-y-1/3 translate-x-1/4" />
@@ -42,8 +131,8 @@ export default function Home() {
           </h1>
 
           <p className="text-lg text-stone-500 max-w-2xl mx-auto leading-relaxed mb-10">
-            Crea invitaciones digitales que capturan la magia de bodas, XV años y momentos únicos.
-            Elegantes, personalizables y listas en minutos.
+            Editor de bloques, 15 tipos de sección, animaciones, galería, mapas, video y más.
+            Crea invitaciones que impresionan — sin tocar una línea de código.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -94,22 +183,26 @@ export default function Home() {
             </div>
             <div className="flex gap-2 justify-center">
               <div className="bg-rose-600 text-white text-xs px-4 py-2 rounded-full">Confirmar asistencia</div>
-              <div className="border border-rose-200 text-rose-600 text-xs px-4 py-2 rounded-full">📅 Calendario</div>
+              <div className="border border-rose-200 text-rose-600 text-xs px-4 py-2 rounded-full">📍 Mapa</div>
             </div>
           </div>
-          <div className="absolute -left-6 top-1/3 bg-white border border-rose-100 rounded-xl px-3 py-2 shadow-lg text-xs text-stone-600 hidden sm:block">
-            ✓ RSVP por WhatsApp
+          <div className="absolute -left-6 top-1/4 bg-white border border-rose-100 rounded-xl px-3 py-2 shadow-lg text-xs text-stone-600 hidden sm:block">
+            ✨ Animaciones al scroll
           </div>
-          <div className="absolute -right-6 top-2/3 bg-white border border-fuchsia-100 rounded-xl px-3 py-2 shadow-lg text-xs text-stone-600 hidden sm:block">
-            ✓ Galería de fotos
+          <div className="absolute -right-6 top-1/2 bg-white border border-fuchsia-100 rounded-xl px-3 py-2 shadow-lg text-xs text-stone-600 hidden sm:block">
+            🎬 Video embed
+          </div>
+          <div className="absolute -left-4 bottom-10 bg-white border border-emerald-100 rounded-xl px-3 py-2 shadow-lg text-xs text-stone-600 hidden sm:block">
+            🧩 15 tipos de bloque
           </div>
         </div>
       </section>
 
-      {/* Stats */}
+      {/* ── Stats ────────────────────────────────────────── */}
       <section className="py-16 px-6 bg-stone-900">
-        <div className="mx-auto max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-10 text-center">
+        <div className="mx-auto max-w-4xl grid grid-cols-2 sm:grid-cols-4 gap-10 text-center">
           {[
+            { value: "15", label: "Tipos de bloque" },
             { value: "2 min", label: "Para tener tu invitación lista" },
             { value: "100%", label: "Optimizada para móvil" },
             { value: "∞", label: "Momentos para compartir" },
@@ -127,28 +220,53 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* ── How it works ─────────────────────────────────── */}
+      <section className="py-20 px-6 bg-rose-50/40">
+        <div className="mx-auto max-w-4xl">
+          <div className="text-center mb-14">
+            <p className="text-xs tracking-[0.3em] text-rose-400 uppercase mb-3">Así funciona</p>
+            <h2
+              className="text-4xl font-bold text-stone-900"
+              style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+            >
+              Listo en minutos
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {STEPS.map((step) => (
+              <div key={step.num} className="text-center">
+                <p
+                  className="text-6xl font-bold text-rose-200 mb-4 leading-none"
+                  style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+                >
+                  {step.num}
+                </p>
+                <h3 className="font-semibold text-stone-800 text-lg mb-2">{step.title}</h3>
+                <p className="text-stone-500 text-sm leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Features grid ────────────────────────────────── */}
       <section className="py-20 px-6 bg-white">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-14">
-            <p className="text-xs tracking-[0.3em] text-rose-400 uppercase mb-3">Lo que incluye</p>
+            <p className="text-xs tracking-[0.3em] text-rose-400 uppercase mb-3">Todo incluido</p>
             <h2
               className="text-4xl font-bold text-stone-900 leading-snug"
               style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
             >
-              Todo lo que necesitas para<br />el día más especial
+              Construido para impresionar
             </h2>
+            <p className="text-stone-500 mt-3 max-w-xl mx-auto text-sm leading-relaxed">
+              Cada función fue diseñada para que la invitación sea tan especial como el evento.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {[
-              { icon: "💌", title: "URLs únicas", desc: "Cada invitación tiene su propio enlace personalizado para compartir fácilmente." },
-              { icon: "🎨", title: "Temas elegantes", desc: "Elige entre distintos estilos visuales que van con la personalidad del evento." },
-              { icon: "📱", title: "RSVP por WhatsApp", desc: "Confirma asistentes directamente desde WhatsApp con un mensaje prediseñado." },
-              { icon: "🗺️", title: "Ubicaciones con mapas", desc: "Guía a tus invitados con enlaces directos a Google Maps para cada lugar." },
-              { icon: "📸", title: "Galería de fotos", desc: "Muestra los mejores momentos con una galería hermosa y optimizada para móvil." },
-              { icon: "📅", title: "Botón de calendario", desc: "Un clic y el evento queda guardado en Google Calendar automáticamente." },
-            ].map((feature) => (
+            {FEATURES.map((feature) => (
               <div
                 key={feature.title}
                 className="group p-6 rounded-2xl border border-zinc-100 hover:border-rose-200 hover:bg-rose-50/30 transition-all cursor-default"
@@ -162,7 +280,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* ── Block types ──────────────────────────────────── */}
+      <section className="py-20 px-6 bg-stone-900">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-xs tracking-[0.3em] text-rose-400 uppercase mb-3">Bloques disponibles</p>
+          <h2
+            className="text-4xl font-bold text-white mb-4"
+            style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+          >
+            Una sección para cada momento
+          </h2>
+          <p className="text-stone-400 text-sm mb-10 max-w-lg mx-auto leading-relaxed">
+            Combina los bloques que necesites en el orden que quieras. Cada uno es completamente configurable.
+          </p>
+          <div className="flex flex-wrap gap-2.5 justify-center">
+            {BLOCK_TYPES.map((type) => (
+              <span
+                key={type}
+                className="px-4 py-2 rounded-full border border-stone-700 text-stone-300 text-sm hover:border-rose-500 hover:text-rose-300 transition-colors cursor-default"
+              >
+                {type}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ──────────────────────────────────────────── */}
       <section className="py-24 px-6 bg-gradient-to-br from-rose-50 via-white to-fuchsia-50">
         <div className="mx-auto max-w-2xl text-center">
           <div className="flex justify-center items-center gap-4 mb-6">
@@ -188,9 +332,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ── Footer ───────────────────────────────────────── */}
       <footer className="py-8 px-6 border-t border-zinc-100 text-center text-xs text-stone-400">
-        <p>© 2025 AvCenter Invitations · Hecho con amor para momentos que duran para siempre</p>
+        <p>© 2026 AvCenter Invitations · Hecho con amor para momentos que duran para siempre</p>
       </footer>
     </div>
   );
