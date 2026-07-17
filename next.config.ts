@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Evita que el bundler intente resolver empaquetado de `qrcode` (API routes / Turbopack).
+  serverExternalPackages: ["qrcode"],
   images: {
     remotePatterns: [
       {

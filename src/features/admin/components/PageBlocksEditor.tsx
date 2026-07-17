@@ -28,6 +28,7 @@ import {
   CHILD_BLOCK_TYPES,
   type GalleryImage,
   type ScheduleItem,
+  type SubEventItem,
   type GiftItem,
 } from "@/features/invitation/types/blocks";
 import { GalleryManager, type GalleryItem } from "@/features/admin/components/GalleryManager";
@@ -66,6 +67,7 @@ function defaultConfig(type: BlockType): Record<string, unknown> {
     case "dress_code":   return { title: "", description: "", colors: [] };
     case "gift_registry":return { title: "", items: [] };
     case "video":        return { url: "", title: "", aspect: "16:9" };
+    case "subevents":    return { title: "Nuestros eventos", items: [] };
     case "grid":         return { title: "", columns: 2, gap: "md", align: "start", justify: "start", children: [] };
     case "flex":         return { title: "", gap: "md", align: "center", justify: "center", children: [] };
   }
@@ -327,6 +329,50 @@ function ConfigPanel({
           <button type="button" className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:border-zinc-600"
             onClick={() => set("items", [...items, { title: "", starts_at: new Date().toISOString(), ends_at: null, details: "" }])}>
             + Agregar momento
+          </button>
+        </div>
+      );
+    }
+
+    case "subevents": {
+      const items: SubEventItem[] = cfg.items ?? [];
+      const patch = (i: number, changes: Partial<SubEventItem>) =>
+        set("items", items.map((s, idx) => (idx === i ? { ...s, ...changes } : s)));
+      return (
+        <div className="space-y-2">
+          <label className="flex flex-col gap-1 text-sm">
+            Título de la sección
+            <input className={inp()} placeholder="Nuestros eventos" value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
+          </label>
+          {items.map((item, i) => (
+            <div key={i} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 space-y-2 dark:border-zinc-700 dark:bg-zinc-800">
+              <div className="flex gap-2">
+                <input className={inp("w-16")} placeholder="⛪" value={item.emoji ?? ""}
+                  onChange={(e) => patch(i, { emoji: e.target.value })} />
+                <input className={inp("flex-1")} placeholder="Nombre (Ej. Ceremonia religiosa)" value={item.name}
+                  onChange={(e) => patch(i, { name: e.target.value })} />
+                <button type="button" onClick={() => set("items", items.filter((_, idx) => idx !== i))}
+                  className="rounded-lg border border-zinc-300 px-2 text-xs hover:bg-zinc-100 dark:border-zinc-600">✕</button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input type="datetime-local" className={inp()} value={toDateTimeLocalValue(item.starts_at)}
+                  onChange={(e) => patch(i, { starts_at: toIsoOrNull(e.target.value) ?? item.starts_at })} />
+                <input type="datetime-local" className={inp()} value={toDateTimeLocalValue(item.ends_at)}
+                  onChange={(e) => patch(i, { ends_at: toIsoOrNull(e.target.value) })} />
+              </div>
+              <input className={inp("w-full")} placeholder="Lugar (Ej. Parroquia San José)" value={item.location_label ?? ""}
+                onChange={(e) => patch(i, { location_label: e.target.value })} />
+              <input className={inp("w-full")} placeholder="Dirección" value={item.address ?? ""}
+                onChange={(e) => patch(i, { address: e.target.value })} />
+              <input className={inp("w-full")} placeholder="URL de Google Maps (opcional)" value={item.maps_url ?? ""}
+                onChange={(e) => patch(i, { maps_url: e.target.value })} />
+              <input className={inp("w-full")} placeholder="Código de vestimenta (opcional)" value={item.dress_code ?? ""}
+                onChange={(e) => patch(i, { dress_code: e.target.value })} />
+            </div>
+          ))}
+          <button type="button" className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:border-zinc-600"
+            onClick={() => set("items", [...items, { name: "", emoji: "", starts_at: new Date().toISOString(), ends_at: null, location_label: "", address: "", maps_url: "", dress_code: "" }])}>
+            + Agregar evento
           </button>
         </div>
       );

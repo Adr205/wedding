@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/serviceClient";
-
-const rsvpSchema = z.object({
-  slug: z.string().min(1),
-  name: z.string().min(2).max(100),
-  phone: z.string().max(20).optional().nullable(),
-  plus_ones: z.number().int().min(0).max(20).default(0),
-});
+import { publicRsvpSchema } from "@/lib/validation/guestSchemas";
+import { respondWithToken } from "@/features/invitation/data/guestInvite";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -17,12 +11,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Cuerpo inválido" }, { status: 400 });
   }
 
-  const parsed = rsvpSchema.safeParse(body);
+  const parsed = publicRsvpSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ ok: false, message: "Datos inválidos", issues: parsed.error.flatten() }, { status: 422 });
+    return NextResponse.json(
+      { ok: false, message: "Datos inválidos", issues: parsed.error.flatten() },
+      { status: 422 },
+    );
   }
 
-  const { slug, name, phone, plus_ones } = parsed.data;
+  const { slug, token, name, phone, plus_ones, attending, website } = parsed.data;
+
+  // Honeypot: bots fill hidden fields. Pretend success without writing anything.
+  if (website) return NextResponse.json({ ok: true });
+
+  // ── Personalized invite: update the pre-loaded guest row ──────────────────
+  if (token) {
+    const ok = await respondWithToken({
+      slug,
+      token,
+      name,
+      phone: phone ?? null,
+      plus_ones,
+      attending,
+    });
+    if (!ok) {
+      return NextResponse.json({ ok: false, message: "Invitación no válida" }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // ── Open RSVP: insert a new guest row ─────────────────────────────────────
   const supabase = createServiceClient();
 
   const { data: event } = await supabase
@@ -41,7 +59,8 @@ export async function POST(request: Request) {
     guest_name: name,
     guest_phone: phone ?? null,
     plus_ones,
-    confirmation_status: "confirmed",
+    confirmation_status: attending ? "confirmed" : "declined",
+    responded_at: new Date().toISOString(),
   });
 
   if (error) {

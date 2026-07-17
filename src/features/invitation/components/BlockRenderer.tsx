@@ -16,6 +16,7 @@ import { DividerBlock } from "./blocks/DividerBlock";
 import { DressCodeBlock } from "./blocks/DressCodeBlock";
 import { GiftRegistryBlock } from "./blocks/GiftRegistryBlock";
 import { VideoBlock } from "./blocks/VideoBlock";
+import { SubeventsBlock } from "./blocks/SubeventsBlock";
 import { ContainerBlock } from "./blocks/ContainerBlock";
 import { AnimatedWrapper } from "./AnimatedWrapper";
 
@@ -57,6 +58,7 @@ export function BlockRenderer({ block, ctx }: Props) {
       case "dress_code":  return <DressCodeBlock config={cfg} ctx={ctx} />;
       case "gift_registry": return <GiftRegistryBlock config={cfg} ctx={ctx} />;
       case "video":       return <VideoBlock config={cfg} />;
+      case "subevents":   return <SubeventsBlock config={cfg} ctx={ctx} />;
       case "grid":        return <ContainerBlock config={{ ...cfg, layout: "grid" }} ctx={ctx} />;
       case "flex":        return <ContainerBlock config={{ ...cfg, layout: "flex" }} ctx={ctx} />;
       default:            return null;

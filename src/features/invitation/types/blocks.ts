@@ -12,6 +12,7 @@ export type BlockType =
   | "dress_code"
   | "gift_registry"
   | "video"
+  | "subevents"
   | "grid"
   | "flex";
 
@@ -83,6 +84,19 @@ export type VideoConfig = {
   aspect?: "16:9" | "4:3" | "1:1";
 };
 
+export type SubEventItem = {
+  name: string;
+  emoji?: string;
+  starts_at: string;
+  ends_at?: string | null;
+  location_label?: string;
+  address?: string;
+  maps_url?: string | null;
+  dress_code?: string;
+};
+
+export type SubeventsConfig = { title?: string; items: SubEventItem[] };
+
 export type ContainerConfig = {
   layout: "grid" | "flex";
   title?: string;
@@ -121,6 +135,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   dress_code: "Código de vestimenta",
   gift_registry: "Mesa de regalos",
   video: "Video (YouTube / Vimeo)",
+  subevents: "Sub-eventos (civil · religiosa · fiesta)",
   grid: "Contenedor Grid",
   flex: "Contenedor Flex",
 };
@@ -133,6 +148,7 @@ export const ADDABLE_BLOCK_TYPES: BlockType[] = [
   "gallery",
   "video",
   "schedule",
+  "subevents",
   "location",
   "countdown",
   "divider",
@@ -155,6 +171,6 @@ export const ANIMATION_LABELS: Record<BlockAnimation, string> = {
 // Block types that can be children inside a container (no nesting containers)
 export const CHILD_BLOCK_TYPES: BlockType[] = [
   "text", "quote", "photo", "gallery", "video",
-  "schedule", "location", "countdown", "divider",
+  "schedule", "subevents", "location", "countdown", "divider",
   "dress_code", "gift_registry", "rsvp",
 ];
