@@ -62,6 +62,12 @@ export default async function AdminEventDetailPage({ params }: AdminEventDetailP
             Mesas
           </Link>
           <Link
+            href={`/admin/events/${id}/moderation`}
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors dark:border-zinc-600 dark:text-zinc-300"
+          >
+            Moderación
+          </Link>
+          <Link
             href={`/admin/events/${id}/preview`}
             target="_blank"
             className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors dark:border-zinc-600 dark:text-zinc-300"

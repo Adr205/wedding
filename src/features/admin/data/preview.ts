@@ -42,5 +42,7 @@ export async function getInvitationPreview(
     theme: theme ?? { theme_key: "elegant" },
     blocks: blocks ?? [],
     rsvp: rsvp ?? { whatsapp_number: "", message_template: "", enabled: false },
+    messages: [],
+    uploads: [],
   };
 }

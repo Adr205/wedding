@@ -29,11 +29,27 @@ export type EventRsvpSettings = {
   enabled: boolean;
 };
 
+export type GuestbookMessage = {
+  id: string;
+  author_name: string;
+  body: string;
+  created_at: string;
+};
+
+export type GuestUpload = {
+  id: string;
+  uploader_name: string | null;
+  image_url: string;
+  created_at: string;
+};
+
 export type FullInvitation = {
   event: EventRow;
   theme: EventTheme;
   blocks: PageBlock[];
   rsvp: EventRsvpSettings;
+  messages: GuestbookMessage[];
+  uploads: GuestUpload[];
 };
 
 // Legacy types kept for migration layer compatibility

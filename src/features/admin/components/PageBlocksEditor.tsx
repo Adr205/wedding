@@ -68,6 +68,8 @@ function defaultConfig(type: BlockType): Record<string, unknown> {
     case "gift_registry":return { title: "", items: [] };
     case "video":        return { url: "", title: "", aspect: "16:9" };
     case "subevents":    return { title: "Nuestros eventos", items: [] };
+    case "guestbook":    return { title: "Libro de mensajes", subtitle: "" };
+    case "guest_gallery":return { title: "Comparte tus fotos", subtitle: "" };
     case "grid":         return { title: "", columns: 2, gap: "md", align: "start", justify: "start", children: [] };
     case "flex":         return { title: "", gap: "md", align: "center", justify: "center", children: [] };
   }
@@ -374,6 +376,26 @@ function ConfigPanel({
             onClick={() => set("items", [...items, { name: "", emoji: "", starts_at: new Date().toISOString(), ends_at: null, location_label: "", address: "", maps_url: "", dress_code: "" }])}>
             + Agregar evento
           </button>
+        </div>
+      );
+    }
+
+    case "guestbook":
+    case "guest_gallery": {
+      const hint = block.block_type === "guestbook"
+        ? "Los mensajes de los invitados se aprueban en la pestaña “Moderación”."
+        : "Las fotos que suban los invitados se aprueban en la pestaña “Moderación”.";
+      return (
+        <div className="space-y-2">
+          <label className="flex flex-col gap-1 text-sm">
+            Título
+            <input className={inp()} value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Subtítulo
+            <input className={inp()} value={cfg.subtitle ?? ""} onChange={(e) => set("subtitle", e.target.value)} />
+          </label>
+          <p className="text-xs text-zinc-400">{hint}</p>
         </div>
       );
     }

@@ -31,10 +31,35 @@ export async function getInvitationBySlug(slug: string): Promise<FullInvitation 
       .single(),
   ]);
 
+  const blockList = blocks ?? [];
+  const hasGuestbook = blockList.some((b) => b.block_type === "guestbook");
+  const hasGuestGallery = blockList.some((b) => b.block_type === "guest_gallery");
+
+  const [messagesRes, uploadsRes] = await Promise.all([
+    hasGuestbook
+      ? supabase
+          .from("event_messages")
+          .select("id, author_name, body, created_at")
+          .eq("event_id", event.id)
+          .eq("approved", true)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    hasGuestGallery
+      ? supabase
+          .from("event_uploads")
+          .select("id, uploader_name, image_url, created_at")
+          .eq("event_id", event.id)
+          .eq("approved", true)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+  ]);
+
   return {
     event,
     theme: theme ?? { theme_key: "elegant" },
-    blocks: blocks ?? [],
+    blocks: blockList,
     rsvp: rsvp ?? { whatsapp_number: "", message_template: "", enabled: false },
+    messages: messagesRes.data ?? [],
+    uploads: uploadsRes.data ?? [],
   };
 }

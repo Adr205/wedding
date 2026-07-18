@@ -5,7 +5,7 @@ const pageBlockSchema = z.object({
   block_type: z.enum([
     "hero", "countdown", "quote", "text", "photo", "gallery",
     "schedule", "location", "rsvp", "divider", "dress_code", "gift_registry",
-    "video", "subevents", "grid", "flex",
+    "video", "subevents", "guestbook", "guest_gallery", "grid", "flex",
   ]),
   config: z.record(z.string(), z.unknown()),
   display_order: z.number().int().nonnegative().default(0),

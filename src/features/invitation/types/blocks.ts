@@ -13,6 +13,8 @@ export type BlockType =
   | "gift_registry"
   | "video"
   | "subevents"
+  | "guestbook"
+  | "guest_gallery"
   | "grid"
   | "flex";
 
@@ -97,6 +99,10 @@ export type SubEventItem = {
 
 export type SubeventsConfig = { title?: string; items: SubEventItem[] };
 
+export type GuestbookConfig = { title?: string; subtitle?: string };
+
+export type GuestGalleryConfig = { title?: string; subtitle?: string };
+
 export type ContainerConfig = {
   layout: "grid" | "flex";
   title?: string;
@@ -136,6 +142,8 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   gift_registry: "Mesa de regalos",
   video: "Video (YouTube / Vimeo)",
   subevents: "Sub-eventos (civil · religiosa · fiesta)",
+  guestbook: "Libro de mensajes",
+  guest_gallery: "Galería colaborativa (invitados)",
   grid: "Contenedor Grid",
   flex: "Contenedor Flex",
 };
@@ -154,6 +162,8 @@ export const ADDABLE_BLOCK_TYPES: BlockType[] = [
   "divider",
   "dress_code",
   "gift_registry",
+  "guestbook",
+  "guest_gallery",
   "rsvp",
   "grid",
   "flex",
@@ -172,5 +182,5 @@ export const ANIMATION_LABELS: Record<BlockAnimation, string> = {
 export const CHILD_BLOCK_TYPES: BlockType[] = [
   "text", "quote", "photo", "gallery", "video",
   "schedule", "subevents", "location", "countdown", "divider",
-  "dress_code", "gift_registry", "rsvp",
+  "dress_code", "gift_registry", "guestbook", "guest_gallery", "rsvp",
 ];
