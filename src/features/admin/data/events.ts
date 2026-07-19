@@ -47,7 +47,7 @@ export async function getEventBundle(eventId: string, ownerId: string, superAdmi
   return {
     ...event,
     theme_key: theme?.theme_key ?? "elegant",
-    font_heading: (theme?.typography as Record<string, string> | null)?.heading ?? "Playfair Display",
+    font_heading: (theme?.typography as Record<string, string> | null)?.heading ?? "Great Vibes",
     background_image_url: theme?.background_image_url ?? null,
     default_background_key: theme?.default_background_key ?? null,
     text_color: palette?.text ?? null,
@@ -100,7 +100,7 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
     supabase.from("event_themes").upsert({
       event_id: savedEventId,
       theme_key: data.theme_key,
-      typography: { heading: data.font_heading ?? "Playfair Display" },
+      typography: { heading: data.font_heading ?? "Great Vibes" },
       background_image_url: data.background_image_url ?? null,
       default_background_key: data.default_background_key ?? null,
       palette: {
@@ -167,7 +167,7 @@ export function getDraftEventDefaults(): EventFormInput {
     timezone: "America/Mexico_City",
     is_published: false,
     theme_key: "elegant",
-    font_heading: "Playfair Display",
+    font_heading: "Great Vibes",
     background_image_url: null,
     default_background_key: null,
     whatsapp_number: "52",
