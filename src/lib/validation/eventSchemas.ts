@@ -22,7 +22,7 @@ export const eventFormSchema = z.object({
   timezone: z.string().min(2),
   is_published: z.boolean().default(false),
   theme_key: z.string().min(2),
-  font_heading: z.string().optional().default("Playfair Display"),
+  font_heading: z.string().optional().default("Great Vibes"),
   background_image_url: z.string().url().optional().nullable(),
   default_background_key: z.string().optional().nullable(),
   // Color overrides (stored in event_themes.palette)

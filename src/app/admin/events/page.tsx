@@ -118,11 +118,15 @@ export default async function AdminEventsPage() {
                     </Link>
                     <div className="w-px h-4 bg-zinc-200" />
                     <Link
-                      href={`/i/${event.slug}`}
+                      href={
+                        event.is_published
+                          ? `/i/${event.slug}`
+                          : `/admin/events/${event.id}/preview`
+                      }
                       target="_blank"
                       className="flex-1 text-center text-sm font-medium text-rose-500 hover:text-rose-700 py-1.5 rounded-lg hover:bg-rose-50 transition-colors"
                     >
-                      Ver ↗
+                      {event.is_published ? "Ver ↗" : "Vista previa ↗"}
                     </Link>
                   </div>
                 </div>

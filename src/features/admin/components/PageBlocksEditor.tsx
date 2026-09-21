@@ -61,7 +61,7 @@ function defaultConfig(type: BlockType): Record<string, unknown> {
     case "photo":        return { image_url: "", caption: "", display: "full-width", height: "md" };
     case "gallery":      return { images: [], layout: "grid", columns: 3 };
     case "schedule":     return { title: "Itinerario", items: [] };
-    case "location":     return { label: "", address: "", maps_url: "", starts_at: null, show_map: true };
+    case "location":     return { label: "", address: "", maps_url: "", starts_at: null, show_map: false };
     case "rsvp":         return { title: "", subtitle: "" };
     case "divider":      return { style: "ornament" };
     case "dress_code":   return { title: "", description: "", colors: [] };

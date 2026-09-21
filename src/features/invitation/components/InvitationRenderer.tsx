@@ -18,7 +18,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
   );
   const fontKey =
     (invitation.theme.typography as Record<string, string> | undefined)?.heading ??
-    "Playfair Display";
+    "Great Vibes";
   const fontFamily = `'${fontKey}', Georgia, serif`;
 
   // Palette color overrides

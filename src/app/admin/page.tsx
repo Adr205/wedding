@@ -240,8 +240,16 @@ export default async function AdminDashboard() {
                           <Link href={`/admin/events/${event.id}`} className="text-xs text-stone-600 hover:text-stone-900">
                             Editar
                           </Link>
-                          <Link href={`/i/${event.slug}`} target="_blank" className="text-xs text-rose-500 hover:text-rose-700">
-                            Ver ↗
+                          <Link
+                            href={
+                              event.is_published
+                                ? `/i/${event.slug}`
+                                : `/admin/events/${event.id}/preview`
+                            }
+                            target="_blank"
+                            className="text-xs text-rose-500 hover:text-rose-700"
+                          >
+                            {event.is_published ? "Ver ↗" : "Vista previa ↗"}
                           </Link>
                         </div>
                       </td>

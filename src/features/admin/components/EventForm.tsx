@@ -53,7 +53,7 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
     timezone: String(initialValues.timezone ?? "America/Mexico_City"),
     is_published: Boolean(initialValues.is_published ?? false),
     theme_key: String(initialValues.theme_key ?? "elegant"),
-    font_heading: String(initialValues.font_heading ?? "Playfair Display"),
+    font_heading: String(initialValues.font_heading ?? "Great Vibes"),
     background_image_url: (initialValues.background_image_url as string | null) ?? null,
     default_background_key: (initialValues.default_background_key as string | null) ?? null,
     text_color: (initialValues.text_color as string | null) ?? null,
