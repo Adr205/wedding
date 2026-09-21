@@ -3,7 +3,6 @@ import { saveEventBundle } from "@/features/admin/data/events";
 import { requireApiUser } from "@/lib/auth/requireUser";
 
 export async function POST(request: Request) {
-  debugger;
   const user = await requireApiUser();
   if (!user) {
     return NextResponse.json({ message: "No autorizado" }, { status: 401 });
