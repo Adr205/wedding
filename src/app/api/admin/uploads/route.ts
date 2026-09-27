@@ -52,6 +52,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ message: "No se pudo subir la imagen" }, { status: 500 });
+    return NextResponse.json({ message: "No se pudo subir el archivo" }, { status: 500 });
   }
 }

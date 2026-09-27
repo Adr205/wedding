@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/serviceClient";
 import { eventFormSchema, type EventFormInput } from "@/lib/validation/eventSchemas";
+import { mergeEnvelope, type EnvelopeConfig } from "@/features/invitation/types/envelope";
 
 const EVENT_SELECT = "id, slug, event_type, title, honoree_names, main_date, timezone, is_published";
 const EVENT_SELECT_WITH_OWNER = "id, slug, event_type, title, honoree_names, main_date, timezone, is_published, owner_id";
@@ -27,7 +28,7 @@ export async function getEventBundle(eventId: string, ownerId: string, superAdmi
   const [{ data: theme }, { data: blocks }, { data: rsvp }] = await Promise.all([
     supabase
       .from("event_themes")
-      .select("theme_key, palette, typography, background_image_url, default_background_key")
+      .select("theme_key, palette, typography, block_config, background_image_url, default_background_key")
       .eq("event_id", eventId)
       .single(),
     supabase
@@ -43,6 +44,7 @@ export async function getEventBundle(eventId: string, ownerId: string, superAdmi
   ]);
 
   const palette = theme?.palette as Record<string, string> | null;
+  const blockConfig = theme?.block_config as { envelope?: EnvelopeConfig } | null;
 
   return {
     ...event,
@@ -52,6 +54,7 @@ export async function getEventBundle(eventId: string, ownerId: string, superAdmi
     default_background_key: theme?.default_background_key ?? null,
     text_color: palette?.text ?? null,
     card_bg: palette?.card_bg ?? null,
+    envelope: mergeEnvelope(blockConfig?.envelope),
     whatsapp_number: rsvp?.whatsapp_number ?? "",
     message_template: rsvp?.message_template ?? "Hola, confirmo mi asistencia a {{eventTitle}}.",
     blocks: blocks ?? [],
@@ -96,7 +99,7 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
 
   const savedEventId = upsertEvent.data.id;
 
-  await Promise.all([
+  const [themeResult, rsvpResult] = await Promise.all([
     supabase.from("event_themes").upsert({
       event_id: savedEventId,
       theme_key: data.theme_key,
@@ -107,6 +110,9 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
         ...(data.text_color ? { text: data.text_color } : {}),
         ...(data.card_bg ? { card_bg: data.card_bg } : {}),
       },
+      block_config: {
+        envelope: mergeEnvelope(data.envelope),
+      },
     }),
     supabase.from("event_rsvp_settings").upsert({
       event_id: savedEventId,
@@ -116,11 +122,24 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
     }),
   ]);
 
-  // Delete + reinsert page_blocks
-  await supabase.from("page_blocks").delete().eq("event_id", savedEventId);
+  if (themeResult.error) {
+    return { ok: false, message: themeResult.error.message };
+  }
+  if (rsvpResult.error) {
+    return { ok: false, message: rsvpResult.error.message };
+  }
+
+  const { data: existingBlocks, error: existingError } = await supabase
+    .from("page_blocks")
+    .select("id")
+    .eq("event_id", savedEventId);
+  if (existingError) {
+    return { ok: false, message: existingError.message };
+  }
+  const existingIds = (existingBlocks ?? []).map((row) => row.id);
 
   if (data.blocks.length > 0) {
-    await supabase.from("page_blocks").insert(
+    const { error: insertError } = await supabase.from("page_blocks").insert(
       data.blocks.map((block, i) => ({
         event_id: savedEventId,
         block_type: block.block_type,
@@ -130,6 +149,20 @@ export async function saveEventBundle(ownerId: string, payload: unknown, eventId
         animation: block.animation ?? null,
       })),
     );
+    if (insertError) {
+      return { ok: false, message: insertError.message };
+    }
+  }
+
+  if (existingIds.length > 0) {
+    const { error: deleteError } = await supabase
+      .from("page_blocks")
+      .delete()
+      .eq("event_id", savedEventId)
+      .in("id", existingIds);
+    if (deleteError) {
+      return { ok: false, message: deleteError.message };
+    }
   }
 
   return { ok: true, eventId: savedEventId };
@@ -172,6 +205,7 @@ export function getDraftEventDefaults(): EventFormInput {
     default_background_key: null,
     whatsapp_number: "52",
     message_template: "Hola, confirmo mi asistencia a {{eventTitle}}.",
+    envelope: mergeEnvelope(),
     blocks: [
       { block_type: "hero", config: {}, display_order: 0, enabled: true },
       { block_type: "countdown", config: { style: "numbers" }, display_order: 10, enabled: true },
