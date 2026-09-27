@@ -95,11 +95,10 @@ export function DressCodeBlock({ config, ctx }: Props) {
           {config.description}
         </p>
 
-        {note ? (
-          <p className="text-sm opacity-55 leading-relaxed max-w-sm mx-auto whitespace-pre-line">
-            {note}
-          </p>
-        ) : null}
+        <p className="text-sm opacity-55 leading-relaxed max-w-sm mx-auto">
+          Te pedimos respetar el código indicado para acompañar la ocasión con elegancia.
+          Elige un atuendo acorde al estilo de la celebración.
+        </p>
 
         {colors.length > 0 ? (
           <div className="mt-8">
