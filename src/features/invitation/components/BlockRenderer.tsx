@@ -11,6 +11,7 @@ import { PhotoBlock } from "./blocks/PhotoBlock";
 import { GalleryBlock } from "./blocks/GalleryBlock";
 import { ScheduleBlock } from "./blocks/ScheduleBlock";
 import { LocationBlock } from "./blocks/LocationBlock";
+import { HotelsBlock } from "./blocks/HotelsBlock";
 import { RsvpBlock } from "./blocks/RsvpBlock";
 import { DividerBlock } from "./blocks/DividerBlock";
 import { DressCodeBlock } from "./blocks/DressCodeBlock";
@@ -55,6 +56,7 @@ export function BlockRenderer({ block, ctx }: Props) {
       case "gallery":     return <GalleryBlock config={cfg} />;
       case "schedule":    return <ScheduleBlock config={cfg} ctx={ctx} />;
       case "location":    return <LocationBlock config={cfg} ctx={ctx} />;
+      case "hotels":      return <HotelsBlock config={cfg} ctx={ctx} />;
       case "rsvp":        return <RsvpBlock config={cfg} ctx={ctx} />;
       case "divider":     return <DividerBlock config={cfg} />;
       case "dress_code":  return <DressCodeBlock config={cfg} ctx={ctx} />;

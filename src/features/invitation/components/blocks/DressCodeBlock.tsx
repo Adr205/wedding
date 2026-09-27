@@ -1,4 +1,7 @@
-import type { DressCodeConfig } from "@/features/invitation/types/blocks";
+import {
+  DEFAULT_DRESS_CODE_NOTE,
+  type DressCodeConfig,
+} from "@/features/invitation/types/blocks";
 import type { RenderContext } from "@/features/invitation/components/BlockRenderer";
 
 type Props = { config: DressCodeConfig; ctx: RenderContext };
@@ -52,6 +55,7 @@ function SuitIcon({ className }: { className?: string }) {
 export function DressCodeBlock({ config, ctx }: Props) {
   if (!config.description) return null;
   const colors = config.colors ?? [];
+  const note = (config.note ?? DEFAULT_DRESS_CODE_NOTE).trim();
 
   return (
     <section className="px-6 py-6 max-w-2xl mx-auto text-center">

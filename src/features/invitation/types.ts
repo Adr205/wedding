@@ -1,4 +1,5 @@
 import type { PageBlock } from "@/features/invitation/types/blocks";
+import type { EnvelopeConfig } from "@/features/invitation/types/envelope";
 
 export type EventType = "wedding" | "xv" | "other";
 
@@ -18,7 +19,9 @@ export type EventTheme = {
   palette?: Record<string, string>;
   /** typography.heading stores the selected Google Font key, e.g. "Great Vibes" */
   typography?: Record<string, string>;
-  block_config?: Record<string, boolean>;
+  block_config?: {
+    envelope?: EnvelopeConfig;
+  };
   background_image_url?: string | null;
   default_background_key?: string | null;
 };

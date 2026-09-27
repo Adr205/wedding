@@ -5,15 +5,20 @@ import { WEDDING_FONTS, buildAllFontsUrl } from "@/features/themes/fonts";
 type FontSelectorProps = {
   value: string;
   onChange: (fontKey: string) => void;
+  label?: string;
 };
 
-export function FontSelector({ value, onChange }: FontSelectorProps) {
+export function FontSelector({
+  value,
+  onChange,
+  label = "Tipografía del encabezado",
+}: FontSelectorProps) {
   return (
     <div className="space-y-2">
       {/* Load all preview fonts */}
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
       <link rel="stylesheet" href={buildAllFontsUrl()} />
-      <label className="block text-sm font-medium">Tipografía del encabezado</label>
+      <label className="block text-sm font-medium">{label}</label>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {WEDDING_FONTS.map((font) => (
           <button

@@ -7,6 +7,7 @@ export type BlockType =
   | "gallery"
   | "schedule"
   | "location"
+  | "hotels"
   | "rsvp"
   | "divider"
   | "dress_code"
@@ -66,14 +67,30 @@ export type LocationConfig = {
   show_map?: boolean;
 };
 
+export type HotelItem = {
+  name: string;
+  address: string;
+  url?: string;
+  discount_code?: string;
+};
+
+export type HotelsConfig = {
+  title?: string;
+  items: HotelItem[];
+};
+
 export type RsvpConfig = { title?: string; subtitle?: string };
 
 export type DividerConfig = { style?: "ornament" | "line" | "dots" };
+
+export const DEFAULT_DRESS_CODE_NOTE =
+  "Te pedimos respetar el código indicado para acompañar la ocasión con elegancia. Elige un atuendo acorde al estilo de la celebración.";
 
 export type DressCodeConfig = {
   title?: string;
   description: string;
   colors?: string[];
+  note?: string;
 };
 
 export type GiftItem = { name: string; url: string };
@@ -136,6 +153,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   gallery: "Galería de fotos",
   schedule: "Itinerario",
   location: "Ubicación",
+  hotels: "Hoteles",
   rsvp: "Confirmación (RSVP)",
   divider: "Separador",
   dress_code: "Código de vestimenta",
@@ -158,6 +176,7 @@ export const ADDABLE_BLOCK_TYPES: BlockType[] = [
   "schedule",
   "subevents",
   "location",
+  "hotels",
   "countdown",
   "divider",
   "dress_code",
@@ -181,6 +200,6 @@ export const ANIMATION_LABELS: Record<BlockAnimation, string> = {
 // Block types that can be children inside a container (no nesting containers)
 export const CHILD_BLOCK_TYPES: BlockType[] = [
   "text", "quote", "photo", "gallery", "video",
-  "schedule", "subevents", "location", "countdown", "divider",
+  "schedule", "subevents", "location", "hotels", "countdown", "divider",
   "dress_code", "gift_registry", "guestbook", "guest_gallery", "rsvp",
 ];
