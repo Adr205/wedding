@@ -2,7 +2,7 @@ import { getThemeByKey } from "@/features/themes/registry";
 import type { FullInvitation } from "@/features/invitation/types";
 import { resolveBackgroundUrl } from "@/features/themes/backgrounds";
 import { buildFontUrl } from "@/features/themes/fonts";
-import { buildGoogleCalendarLink } from "@/features/calendar/buildCalendarLinks";
+import { buildCalendarTitle, buildGoogleCalendarLink } from "@/features/calendar/buildCalendarLinks";
 import { BlockRenderer, type RenderContext } from "@/features/invitation/components/BlockRenderer";
 import { DividerBlock } from "@/features/invitation/components/blocks/DividerBlock";
 import { EnvelopeGate } from "@/features/invitation/components/EnvelopeCover";
@@ -92,9 +92,9 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
           <DividerBlock config={{ style: "ornament" }} />
           <a
             href={buildGoogleCalendarLink({
-              title: invitation.event.title,
+              title: buildCalendarTitle(invitation.event.title, invitation.event.event_type),
               startIso: invitation.event.main_date,
-              details: `Invitación a ${invitation.event.title}`,
+              details: `Invitación a ${buildCalendarTitle(invitation.event.title, invitation.event.event_type)}`,
               location: undefined,
             })}
             target="_blank"
