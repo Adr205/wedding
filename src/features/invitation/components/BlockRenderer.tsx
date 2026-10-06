@@ -18,6 +18,7 @@ import { RsvpBlock } from "./blocks/RsvpBlock";
 import { DividerBlock } from "./blocks/DividerBlock";
 import { DressCodeBlock } from "./blocks/DressCodeBlock";
 import { GiftRegistryBlock } from "./blocks/GiftRegistryBlock";
+import { GiftEnvelopesBlock } from "./blocks/GiftEnvelopesBlock";
 import { VideoBlock } from "./blocks/VideoBlock";
 import { SubeventsBlock } from "./blocks/SubeventsBlock";
 import { GuestbookBlock } from "./blocks/GuestbookBlock";
@@ -65,6 +66,7 @@ export function BlockRenderer({ block, ctx }: Props) {
       case "divider":     return <DividerBlock config={cfg} />;
       case "dress_code":  return <DressCodeBlock config={cfg} ctx={ctx} />;
       case "gift_registry": return <GiftRegistryBlock config={cfg} ctx={ctx} />;
+      case "gift_envelopes": return <GiftEnvelopesBlock config={cfg} ctx={ctx} />;
       case "video":       return <VideoBlock config={cfg} />;
       case "subevents":   return <SubeventsBlock config={cfg} ctx={ctx} />;
       case "guestbook":   return <GuestbookBlock config={cfg} ctx={ctx} />;
