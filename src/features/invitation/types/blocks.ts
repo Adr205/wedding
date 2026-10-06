@@ -7,6 +7,9 @@ export type BlockType =
   | "gallery"
   | "schedule"
   | "location"
+  | "hotels"
+  | "parents"
+  | "kids_policy"
   | "rsvp"
   | "divider"
   | "dress_code"
@@ -66,14 +69,46 @@ export type LocationConfig = {
   show_map?: boolean;
 };
 
+export type HotelItem = {
+  name: string;
+  address: string;
+  url?: string;
+  discount_code?: string;
+};
+
+export type HotelsConfig = {
+  title?: string;
+  items: HotelItem[];
+};
+
+export type ParentsConfig = {
+  title?: string;
+  bride_label?: string;
+  bride_parent_1?: string;
+  bride_parent_2?: string;
+  groom_label?: string;
+  groom_parent_1?: string;
+  groom_parent_2?: string;
+};
+
+export type KidsPolicyConfig = {
+  title?: string;
+  allowed: boolean;
+  message?: string;
+};
+
 export type RsvpConfig = { title?: string; subtitle?: string };
 
 export type DividerConfig = { style?: "ornament" | "line" | "dots" };
+
+export const DEFAULT_DRESS_CODE_NOTE =
+  "Te pedimos respetar el código indicado para acompañar la ocasión con elegancia. Elige un atuendo acorde al estilo de la celebración.";
 
 export type DressCodeConfig = {
   title?: string;
   description: string;
   colors?: string[];
+  note?: string;
 };
 
 export type GiftItem = { name: string; url: string };
@@ -136,6 +171,9 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   gallery: "Galería de fotos",
   schedule: "Itinerario",
   location: "Ubicación",
+  hotels: "Hoteles",
+  parents: "Padres de los novios",
+  kids_policy: "Niños (sí / no)",
   rsvp: "Confirmación (RSVP)",
   divider: "Separador",
   dress_code: "Código de vestimenta",
@@ -158,6 +196,9 @@ export const ADDABLE_BLOCK_TYPES: BlockType[] = [
   "schedule",
   "subevents",
   "location",
+  "hotels",
+  "parents",
+  "kids_policy",
   "countdown",
   "divider",
   "dress_code",
@@ -181,6 +222,6 @@ export const ANIMATION_LABELS: Record<BlockAnimation, string> = {
 // Block types that can be children inside a container (no nesting containers)
 export const CHILD_BLOCK_TYPES: BlockType[] = [
   "text", "quote", "photo", "gallery", "video",
-  "schedule", "subevents", "location", "countdown", "divider",
+  "schedule", "subevents", "location", "hotels", "parents", "kids_policy", "countdown", "divider",
   "dress_code", "gift_registry", "guestbook", "guest_gallery", "rsvp",
 ];

@@ -10,17 +10,17 @@ export type WeddingFont = {
 
 export const WEDDING_FONTS: WeddingFont[] = [
   {
-    key: "Playfair Display",
-    name: "Playfair Display",
-    category: "serif",
-    googleFamily: "Playfair+Display:ital,wght@0,700;1,400",
-    previewText: "Sofía & Alejandro",
-  },
-  {
     key: "Great Vibes",
     name: "Great Vibes",
     category: "script",
     googleFamily: "Great+Vibes",
+    previewText: "Sofía & Alejandro",
+  },
+  {
+    key: "Playfair Display",
+    name: "Playfair Display",
+    category: "serif",
+    googleFamily: "Playfair+Display:ital,wght@0,700;1,400",
     previewText: "Sofía & Alejandro",
   },
   {
@@ -67,7 +67,7 @@ export const WEDDING_FONTS: WeddingFont[] = [
   },
 ];
 
-export const DEFAULT_FONT_KEY = "Playfair Display";
+export const DEFAULT_FONT_KEY = "Great Vibes";
 
 /** Builds a single Google Fonts stylesheet URL that loads all wedding fonts */
 export function buildAllFontsUrl(): string {

@@ -4,13 +4,33 @@ const pageBlockSchema = z.object({
   id: z.string().optional(),
   block_type: z.enum([
     "hero", "countdown", "quote", "text", "photo", "gallery",
-    "schedule", "location", "rsvp", "divider", "dress_code", "gift_registry",
+    "schedule", "location", "hotels", "parents", "kids_policy", "rsvp", "divider", "dress_code", "gift_registry",
     "video", "subevents", "guestbook", "guest_gallery", "grid", "flex",
   ]),
   config: z.record(z.string(), z.unknown()),
   display_order: z.number().int().nonnegative().default(0),
   enabled: z.boolean().default(true),
   animation: z.enum(["none", "fade", "slide-up", "slide-left", "slide-right", "zoom"]).nullish(),
+});
+
+const envelopeSchema = z.object({
+  enabled: z.boolean().default(false),
+  headline: z.string().optional().nullable(),
+  initials: z.string().optional().nullable(),
+  names: z.string().optional().nullable(),
+  date_label: z.string().optional().nullable(),
+  background_color: z.string().optional().nullable(),
+  envelope_color: z.string().optional().nullable(),
+  text_color: z.string().optional().nullable(),
+  seal_color: z.string().optional().nullable(),
+  photo_url: z.string().optional().nullable(),
+  card_photo_url: z.string().optional().nullable(),
+  card_text: z.string().optional().nullable(),
+  tag_label: z.string().optional().nullable(),
+  hint: z.string().optional().nullable(),
+  font_key: z.string().optional().nullable(),
+  envelope_fill: z.enum(["color", "image"]).optional().nullable(),
+  envelope_image_url: z.string().optional().nullable(),
 });
 
 export const eventFormSchema = z.object({
@@ -22,7 +42,7 @@ export const eventFormSchema = z.object({
   timezone: z.string().min(2),
   is_published: z.boolean().default(false),
   theme_key: z.string().min(2),
-  font_heading: z.string().optional().default("Playfair Display"),
+  font_heading: z.string().optional().default("Great Vibes"),
   background_image_url: z.string().url().optional().nullable(),
   default_background_key: z.string().optional().nullable(),
   // Color overrides (stored in event_themes.palette)
@@ -30,6 +50,7 @@ export const eventFormSchema = z.object({
   card_bg: z.string().optional().nullable(),
   whatsapp_number: z.string().min(8),
   message_template: z.string().min(5),
+  envelope: envelopeSchema.optional().default({ enabled: false }),
   blocks: z.array(pageBlockSchema).default([]),
 });
 

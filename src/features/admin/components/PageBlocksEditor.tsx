@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -8,7 +8,9 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
+  DragOverlay,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -30,6 +32,8 @@ import {
   type ScheduleItem,
   type SubEventItem,
   type GiftItem,
+  type HotelItem,
+  DEFAULT_DRESS_CODE_NOTE,
 } from "@/features/invitation/types/blocks";
 import { GalleryManager, type GalleryItem } from "@/features/admin/components/GalleryManager";
 import { ImageUploadButton } from "@/features/admin/components/ImageUploadButton";
@@ -61,10 +65,21 @@ function defaultConfig(type: BlockType): Record<string, unknown> {
     case "photo":        return { image_url: "", caption: "", display: "full-width", height: "md" };
     case "gallery":      return { images: [], layout: "grid", columns: 3 };
     case "schedule":     return { title: "Itinerario", items: [] };
-    case "location":     return { label: "", address: "", maps_url: "", starts_at: null, show_map: true };
+    case "location":     return { label: "", address: "", maps_url: "", starts_at: null, show_map: false };
+    case "hotels":       return { title: "Hospedaje", items: [{ name: "", address: "", url: "", discount_code: "" }] };
+    case "parents":      return {
+      title: "Con la bendición de",
+      bride_label: "Padres de la novia",
+      bride_parent_1: "",
+      bride_parent_2: "",
+      groom_label: "Padres del novio",
+      groom_parent_1: "",
+      groom_parent_2: "",
+    };
+    case "kids_policy":  return { title: "", allowed: true, message: "" };
     case "rsvp":         return { title: "", subtitle: "" };
     case "divider":      return { style: "ornament" };
-    case "dress_code":   return { title: "", description: "", colors: [] };
+    case "dress_code":   return { title: "", description: "", note: DEFAULT_DRESS_CODE_NOTE, colors: [] };
     case "gift_registry":return { title: "", items: [] };
     case "video":        return { url: "", title: "", aspect: "16:9" };
     case "subevents":    return { title: "Nuestros eventos", items: [] };
@@ -400,6 +415,130 @@ function ConfigPanel({
       );
     }
 
+    case "hotels": {
+      const items: HotelItem[] = cfg.items ?? [];
+      const patchHotel = (i: number, next: Partial<HotelItem>) =>
+        set("items", items.map((item, idx) => (idx === i ? { ...item, ...next } : item)));
+      return (
+        <div className="space-y-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Título (opcional)
+            <input className={inp()} placeholder="Hospedaje" value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
+          </label>
+          {items.map((item, i) => (
+            <div key={i} className="space-y-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium text-zinc-500">Hotel {i + 1}</p>
+                <button
+                  type="button"
+                  onClick={() => set("items", items.filter((_, idx) => idx !== i))}
+                  className="text-xs text-zinc-400 hover:text-zinc-700"
+                >
+                  ✕
+                </button>
+              </div>
+              <input className={inp("w-full")} placeholder="Nombre del hotel" value={item.name}
+                onChange={(e) => patchHotel(i, { name: e.target.value })} />
+              <input className={inp("w-full")} placeholder="Dirección" value={item.address}
+                onChange={(e) => patchHotel(i, { address: e.target.value })} />
+              <input className={inp("w-full")} placeholder="URL (reservación o Maps)" value={item.url ?? ""}
+                onChange={(e) => patchHotel(i, { url: e.target.value })} />
+              <input className={inp("w-full")} placeholder="Código de descuento" value={item.discount_code ?? ""}
+                onChange={(e) => patchHotel(i, { discount_code: e.target.value })} />
+            </div>
+          ))}
+          <button
+            type="button"
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:border-zinc-600"
+            onClick={() => set("items", [...items, { name: "", address: "", url: "", discount_code: "" }])}
+          >
+            + Agregar hotel
+          </button>
+        </div>
+      );
+    }
+
+    case "parents":
+      return (
+        <div className="space-y-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Título (opcional)
+            <input className={inp()} placeholder="Con la bendición de" value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
+          </label>
+          <div className="space-y-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+            <label className="flex flex-col gap-1 text-sm">
+              Etiqueta — novia
+              <input className={inp()} placeholder="Padres de la novia" value={cfg.bride_label ?? ""} onChange={(e) => set("bride_label", e.target.value)} />
+            </label>
+            <input className={inp("w-full")} placeholder="Nombre del padre o madre" value={cfg.bride_parent_1 ?? ""}
+              onChange={(e) => set("bride_parent_1", e.target.value)} />
+            <input className={inp("w-full")} placeholder="Nombre del padre o madre" value={cfg.bride_parent_2 ?? ""}
+              onChange={(e) => set("bride_parent_2", e.target.value)} />
+          </div>
+          <div className="space-y-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+            <label className="flex flex-col gap-1 text-sm">
+              Etiqueta — novio
+              <input className={inp()} placeholder="Padres del novio" value={cfg.groom_label ?? ""} onChange={(e) => set("groom_label", e.target.value)} />
+            </label>
+            <input className={inp("w-full")} placeholder="Nombre del padre o madre" value={cfg.groom_parent_1 ?? ""}
+              onChange={(e) => set("groom_parent_1", e.target.value)} />
+            <input className={inp("w-full")} placeholder="Nombre del padre o madre" value={cfg.groom_parent_2 ?? ""}
+              onChange={(e) => set("groom_parent_2", e.target.value)} />
+          </div>
+        </div>
+      );
+
+    case "kids_policy":
+      return (
+        <div className="space-y-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Título (opcional)
+            <input
+              className={inp()}
+              placeholder={cfg.allowed !== false ? "Los niños son bienvenidos" : "Evento solo para adultos"}
+              value={cfg.title ?? ""}
+              onChange={(e) => set("title", e.target.value)}
+            />
+          </label>
+          <fieldset className="space-y-2">
+            <legend className="text-sm">¿Se aceptan niños?</legend>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="radio"
+                name={`kids_policy_allowed-${block.id ?? block.display_order}-${depth}`}
+                checked={cfg.allowed !== false}
+                onChange={() => set("allowed", true)}
+                className="rounded-full"
+              />
+              Sí, los niños son bienvenidos
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="radio"
+                name={`kids_policy_allowed-${block.id ?? block.display_order}-${depth}`}
+                checked={cfg.allowed === false}
+                onChange={() => set("allowed", false)}
+                className="rounded-full"
+              />
+              No, celebración solo para adultos
+            </label>
+          </fieldset>
+          <label className="flex flex-col gap-1 text-sm">
+            Mensaje (opcional)
+            <textarea
+              className={inp("min-h-20")}
+              placeholder={
+                cfg.allowed !== false
+                  ? "Los niños son bienvenidos a celebrar con nosotros."
+                  : "Con mucho cariño, les pedimos que esta celebración sea solo para adultos."
+              }
+              value={cfg.message ?? ""}
+              onChange={(e) => set("message", e.target.value)}
+            />
+          </label>
+        </div>
+      );
+
     case "location":
       return (
         <div className="space-y-2">
@@ -465,6 +604,15 @@ function ConfigPanel({
           <label className="flex flex-col gap-1 text-sm">
             Descripción
             <input className={inp()} placeholder="Ej. Formal · Gala · Blanco" value={cfg.description ?? ""} onChange={(e) => set("description", e.target.value)} />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Mensaje (opcional)
+            <textarea
+              className={inp("min-h-20")}
+              placeholder={DEFAULT_DRESS_CODE_NOTE}
+              value={cfg.note ?? DEFAULT_DRESS_CODE_NOTE}
+              onChange={(e) => set("note", e.target.value)}
+            />
           </label>
           <div className="space-y-1">
             <p className="text-sm">Colores de paleta</p>
@@ -670,7 +818,8 @@ function SortableBlockItem({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.45 : 1,
+    zIndex: isDragging ? 20 : undefined,
   };
 
   const isHero = block.block_type === "hero";
@@ -688,12 +837,20 @@ function SortableBlockItem({
         {/* Drag handle */}
         <button
           type="button"
-          className="cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 px-1 touch-none"
-          title="Arrastrar"
+          className="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-200 hover:text-zinc-700 active:cursor-grabbing touch-none dark:hover:bg-zinc-700"
+          title="Arrastrar para reordenar"
+          aria-label="Arrastrar para reordenar"
           {...attributes}
           {...listeners}
         >
-          ⠿
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+            <circle cx="5" cy="3" r="1.4" />
+            <circle cx="11" cy="3" r="1.4" />
+            <circle cx="5" cy="8" r="1.4" />
+            <circle cx="11" cy="8" r="1.4" />
+            <circle cx="5" cy="13" r="1.4" />
+            <circle cx="11" cy="13" r="1.4" />
+          </svg>
         </button>
 
         {/* Label */}
@@ -754,13 +911,21 @@ type Props = {
 export function PageBlocksEditor({ blocks, onChange }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
   // Stable DnD keys per block — must use setState to give SortableContext a new array ref on reorder
   const [dndKeys, setDndKeys] = useState<string[]>(() =>
     blocks.map((b) => b.id ?? crypto.randomUUID()),
   );
 
+  useEffect(() => {
+    if (dndKeys.length === blocks.length) return;
+    setDndKeys((prev) =>
+      blocks.map((block, i) => prev[i] ?? block.id ?? crypto.randomUUID()),
+    );
+  }, [blocks, dndKeys.length]);
+
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -773,8 +938,13 @@ export function PageBlocksEditor({ blocks, onChange }: Props) {
     });
   }
 
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(String(event.active.id));
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    setActiveId(null);
     if (!over || active.id === over.id) return;
 
     const oldIndex = dndKeys.indexOf(active.id as string);
@@ -785,6 +955,10 @@ export function PageBlocksEditor({ blocks, onChange }: Props) {
     onChange(
       arrayMove(blocks, oldIndex, newIndex).map((b, i) => ({ ...b, display_order: i })),
     );
+  }
+
+  function handleDragCancel() {
+    setActiveId(null);
   }
 
   function remove(index: number) {
@@ -822,7 +996,12 @@ export function PageBlocksEditor({ blocks, onChange }: Props) {
   return (
     <section className="space-y-2 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold">Bloques de la página</h3>
+        <div>
+          <h3 className="font-semibold">Bloques de la página</h3>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Arrastra el ícono de puntos para cambiar el orden.
+          </p>
+        </div>
         <div className="relative">
           <button
             type="button"
@@ -852,7 +1031,13 @@ export function PageBlocksEditor({ blocks, onChange }: Props) {
         <p className="text-sm text-zinc-500 dark:text-zinc-400">No hay bloques. Agrega uno.</p>
       ) : null}
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
         <SortableContext items={dndKeys} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">
             {blocks.map((block, index) => {
@@ -875,6 +1060,13 @@ export function PageBlocksEditor({ blocks, onChange }: Props) {
             })}
           </div>
         </SortableContext>
+        <DragOverlay>
+          {activeId ? (
+            <div className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm font-medium shadow-lg dark:border-zinc-600 dark:bg-zinc-800">
+              {BLOCK_LABELS[blocks[dndKeys.indexOf(activeId)]?.block_type ?? "text"]}
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </section>
   );

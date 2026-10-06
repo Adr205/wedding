@@ -7,7 +7,9 @@ import { availableThemes } from "@/features/themes/registry";
 import { FontSelector } from "@/features/admin/components/FontSelector";
 import { BackgroundSelector } from "@/features/admin/components/BackgroundSelector";
 import { PageBlocksEditor } from "@/features/admin/components/PageBlocksEditor";
+import { EnvelopeEditor } from "@/features/admin/components/EnvelopeEditor";
 import type { PageBlock } from "@/features/invitation/types/blocks";
+import { mergeEnvelope, type EnvelopeConfig } from "@/features/invitation/types/envelope";
 
 type EventFormProps = {
   mode: "create" | "edit";
@@ -53,7 +55,7 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
     timezone: String(initialValues.timezone ?? "America/Mexico_City"),
     is_published: Boolean(initialValues.is_published ?? false),
     theme_key: String(initialValues.theme_key ?? "elegant"),
-    font_heading: String(initialValues.font_heading ?? "Playfair Display"),
+    font_heading: String(initialValues.font_heading ?? "Great Vibes"),
     background_image_url: (initialValues.background_image_url as string | null) ?? null,
     default_background_key: (initialValues.default_background_key as string | null) ?? null,
     text_color: (initialValues.text_color as string | null) ?? null,
@@ -62,6 +64,7 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
     message_template: String(
       initialValues.message_template ?? "Hola, confirmo mi asistencia a {{eventTitle}}.",
     ),
+    envelope: mergeEnvelope(initialValues.envelope as EnvelopeConfig | undefined),
     blocks: ensureArray<PageBlock>(initialValues.blocks),
   }));
 
@@ -91,6 +94,7 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
         card_bg: form.card_bg || null,
         whatsapp_number: form.whatsapp_number,
         message_template: form.message_template,
+        envelope: form.envelope,
         blocks: form.blocks.map((block, i) => ({ ...block, display_order: i })),
       };
 
@@ -335,6 +339,11 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
           onChange={(e) => setForm((prev) => ({ ...prev, message_template: e.target.value }))}
         />
       </label>
+
+      <EnvelopeEditor
+        value={form.envelope}
+        onChange={(envelope) => setForm((prev) => ({ ...prev, envelope }))}
+      />
 
       {/* ── Bloques de la página ─────────────────────────── */}
       <PageBlocksEditor
