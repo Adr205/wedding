@@ -34,6 +34,7 @@ import {
   type GiftItem,
   type HotelItem,
   DEFAULT_DRESS_CODE_NOTE,
+  DEFAULT_GIFT_ENVELOPES_MESSAGE,
 } from "@/features/invitation/types/blocks";
 import { GalleryManager, type GalleryItem } from "@/features/admin/components/GalleryManager";
 import { ImageUploadButton } from "@/features/admin/components/ImageUploadButton";
@@ -55,7 +56,11 @@ function defaultConfig(type: BlockType): Record<string, unknown> {
     case "gallery":      return { images: [], layout: "grid", columns: 3 };
     case "schedule":     return { title: "Itinerario", items: [] };
     case "location":     return { label: "", address: "", maps_url: "", starts_at: null, show_map: false };
-    case "hotels":       return { title: "Hospedaje", items: [{ name: "", address: "", url: "", discount_code: "" }] };
+    case "hotels":       return {
+      title: "Hospedaje",
+      message: "Contamos con código de descuento en hoteles cercanos. La reservación y el pago son por cuenta de cada invitado.",
+      items: [{ name: "", address: "", url: "", discount_code: "" }],
+    };
     case "parents":      return {
       title: "Con la bendición de",
       bride_label: "Padres de la novia",
@@ -70,6 +75,10 @@ function defaultConfig(type: BlockType): Record<string, unknown> {
     case "divider":      return { style: "ornament" };
     case "dress_code":   return { title: "", description: "", note: DEFAULT_DRESS_CODE_NOTE, colors: [] };
     case "gift_registry":return { title: "", items: [] };
+    case "gift_envelopes": return {
+      title: "Mesa de regalos",
+      message: DEFAULT_GIFT_ENVELOPES_MESSAGE,
+    };
     case "video":        return { url: "", title: "", aspect: "16:9" };
     case "subevents":    return { title: "Nuestros eventos", items: [] };
     case "guestbook":    return { title: "Libro de mensajes", subtitle: "" };
@@ -414,6 +423,15 @@ function ConfigPanel({
             Título (opcional)
             <input className={inp()} placeholder="Hospedaje" value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
           </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Mensaje (opcional)
+            <textarea
+              className={inp("min-h-20")}
+              placeholder="Contamos con código de descuento en hoteles cercanos. La reservación y el pago son por cuenta de cada invitado."
+              value={cfg.message ?? ""}
+              onChange={(e) => set("message", e.target.value)}
+            />
+          </label>
           {items.map((item, i) => (
             <div key={i} className="space-y-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
               <div className="flex items-center justify-between">
@@ -648,6 +666,33 @@ function ConfigPanel({
         </div>
       );
     }
+
+    case "gift_envelopes":
+      return (
+        <div className="space-y-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Título (opcional)
+            <input
+              className={inp()}
+              placeholder="Mesa de regalos"
+              value={cfg.title ?? ""}
+              onChange={(e) => set("title", e.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Mensaje
+            <textarea
+              className={inp("min-h-24")}
+              placeholder={DEFAULT_GIFT_ENVELOPES_MESSAGE}
+              value={cfg.message ?? DEFAULT_GIFT_ENVELOPES_MESSAGE}
+              onChange={(e) => set("message", e.target.value)}
+            />
+          </label>
+          <p className="text-xs text-zinc-400">
+            Ideal para indicar que los regalos se reciben en sobre el día del evento.
+          </p>
+        </div>
+      );
 
     case "video":
       return (

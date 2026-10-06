@@ -14,6 +14,7 @@ export type BlockType =
   | "divider"
   | "dress_code"
   | "gift_registry"
+  | "gift_envelopes"
   | "video"
   | "subevents"
   | "guestbook"
@@ -78,6 +79,7 @@ export type HotelItem = {
 
 export type HotelsConfig = {
   title?: string;
+  message?: string;
   items: HotelItem[];
 };
 
@@ -114,6 +116,14 @@ export type DressCodeConfig = {
 export type GiftItem = { name: string; url: string };
 
 export type GiftRegistryConfig = { title?: string; items: GiftItem[] };
+
+export const DEFAULT_GIFT_ENVELOPES_MESSAGE =
+  "El mejor regalo es compartir este día con ustedes. Si desean obsequiarnos algo, con mucho cariño recibiremos su detalle en sobre el día de la celebración.";
+
+export type GiftEnvelopesConfig = {
+  title?: string;
+  message?: string;
+};
 
 export type VideoConfig = {
   url: string;
@@ -178,6 +188,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   divider: "Separador",
   dress_code: "Código de vestimenta",
   gift_registry: "Mesa de regalos",
+  gift_envelopes: "Regalos en sobre",
   video: "Video (YouTube / Vimeo)",
   subevents: "Sub-eventos (civil · religiosa · fiesta)",
   guestbook: "Libro de mensajes",
@@ -203,6 +214,7 @@ export const ADDABLE_BLOCK_TYPES: BlockType[] = [
   "divider",
   "dress_code",
   "gift_registry",
+  "gift_envelopes",
   "guestbook",
   "guest_gallery",
   "rsvp",
@@ -223,5 +235,5 @@ export const ANIMATION_LABELS: Record<BlockAnimation, string> = {
 export const CHILD_BLOCK_TYPES: BlockType[] = [
   "text", "quote", "photo", "gallery", "video",
   "schedule", "subevents", "location", "hotels", "parents", "kids_policy", "countdown", "divider",
-  "dress_code", "gift_registry", "guestbook", "guest_gallery", "rsvp",
+  "dress_code", "gift_registry", "gift_envelopes", "guestbook", "guest_gallery", "rsvp",
 ];

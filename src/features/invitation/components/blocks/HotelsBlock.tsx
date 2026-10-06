@@ -20,11 +20,19 @@ export function HotelsBlock({ config, ctx }: Props) {
         </div>
 
         <h3
-          className="text-2xl sm:text-3xl font-normal tracking-wide mb-8"
+          className="text-2xl sm:text-3xl font-normal tracking-wide mb-3"
           style={{ fontFamily: ctx.fontFamily }}
         >
           {config.title || "Hoteles"}
         </h3>
+
+        {config.message?.trim() ? (
+          <p className="text-sm opacity-55 leading-relaxed max-w-sm mx-auto mb-8 whitespace-pre-line">
+            {config.message.trim()}
+          </p>
+        ) : (
+          <div className="mb-8" />
+        )}
 
         <div className="space-y-8">
           {items.map((item, i) => (
