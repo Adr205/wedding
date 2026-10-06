@@ -1,15 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
 import type { FullInvitation } from "@/features/invitation/types";
+import { sanitizeSlugParam } from "@/lib/slug";
 
 export async function getInvitationBySlug(slug: string): Promise<FullInvitation | null> {
   const supabase = await createClient();
+  const safeSlug = sanitizeSlugParam(slug);
+  if (!safeSlug) return null;
 
   const { data: event } = await supabase
     .from("events")
     .select("id, slug, event_type, title, honoree_names, main_date, timezone, is_published")
-    .eq("slug", slug)
+    // Case-insensitive so /i/KSRC and /i/ksrc both resolve
+    .ilike("slug", safeSlug)
     .eq("is_published", true)
-    .single();
+    .maybeSingle();
 
   if (!event) return null;
 

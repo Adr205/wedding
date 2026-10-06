@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/serviceClient";
+import { sanitizeSlugParam } from "@/lib/slug";
 
 export type GuestPrefill = {
   guest_name: string;
@@ -21,9 +22,9 @@ export async function getGuestByToken(
   const { data: event } = await supabase
     .from("events")
     .select("id")
-    .eq("slug", slug)
+    .ilike("slug", sanitizeSlugParam(slug))
     .eq("is_published", true)
-    .single();
+    .maybeSingle();
   if (!event) return null;
 
   const { data: guest } = await supabase
@@ -72,9 +73,9 @@ export async function respondWithToken(params: {
   const { data: event } = await supabase
     .from("events")
     .select("id")
-    .eq("slug", slug)
+    .ilike("slug", sanitizeSlugParam(slug))
     .eq("is_published", true)
-    .single();
+    .maybeSingle();
   if (!event) return false;
 
   const { data: guest } = await supabase

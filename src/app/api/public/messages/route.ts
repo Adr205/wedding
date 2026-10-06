@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/serviceClient";
+import { sanitizeSlugParam } from "@/lib/slug";
 
 const schema = z.object({
   slug: z.string().min(1),
@@ -30,9 +31,9 @@ export async function POST(request: Request) {
   const { data: event } = await supabase
     .from("events")
     .select("id")
-    .eq("slug", slug)
+    .ilike("slug", sanitizeSlugParam(slug))
     .eq("is_published", true)
-    .single();
+    .maybeSingle();
 
   if (!event) {
     return NextResponse.json({ ok: false, message: "Evento no encontrado" }, { status: 404 });

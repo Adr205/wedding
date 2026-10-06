@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requirePageUser } from "@/lib/auth/requireUser";
 import { getMyRole, isSuperAdmin } from "@/lib/auth/getRole";
 import { getDashboardStats } from "@/features/admin/data/dashboard";
+import { formatEventDateMedium, formatEventDay, formatEventMonth } from "@/lib/dates";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   wedding: "Boda",
@@ -20,11 +21,7 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return formatEventDateMedium(iso);
 }
 
 function formatRelative(iso: string) {
@@ -129,10 +126,10 @@ export default async function AdminDashboard() {
                     {/* Date block */}
                     <div className="w-12 shrink-0 text-center">
                       <p className="text-lg font-bold text-stone-800 leading-none">
-                        {new Date(event.main_date).getDate()}
+                        {formatEventDay(event.main_date)}
                       </p>
                       <p className="text-[10px] uppercase text-zinc-400 tracking-wide capitalize">
-                        {new Date(event.main_date).toLocaleString("es-MX", { month: "short" })}
+                        {formatEventMonth(event.main_date).slice(0, 3)}
                       </p>
                     </div>
 

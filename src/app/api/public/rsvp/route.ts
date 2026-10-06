@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/serviceClient";
 import { publicRsvpSchema } from "@/lib/validation/guestSchemas";
 import { respondWithToken } from "@/features/invitation/data/guestInvite";
+import { sanitizeSlugParam } from "@/lib/slug";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -46,9 +47,9 @@ export async function POST(request: Request) {
   const { data: event } = await supabase
     .from("events")
     .select("id")
-    .eq("slug", slug)
+    .ilike("slug", sanitizeSlugParam(slug))
     .eq("is_published", true)
-    .single();
+    .maybeSingle();
 
   if (!event) {
     return NextResponse.json({ ok: false, message: "Evento no encontrado" }, { status: 404 });

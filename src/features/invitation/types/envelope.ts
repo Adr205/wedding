@@ -1,4 +1,5 @@
 import type { EventRow } from "@/features/invitation/types";
+import { formatEventDateSlash } from "@/lib/dates";
 
 export type EnvelopeConfig = {
   enabled: boolean;
@@ -51,11 +52,8 @@ function splitHonorees(names: string): string[] {
     .filter(Boolean);
 }
 
-export function formatEnvelopeDate(isoDate: string): string {
-  const d = new Date(isoDate);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+export function formatEnvelopeDate(isoDate: string, timeZone?: string | null): string {
+  return formatEventDateSlash(isoDate, timeZone);
 }
 
 export type ResolvedEnvelope = {
@@ -79,7 +77,7 @@ export function resolveEnvelope(config: EnvelopeConfig, event: EventRow): Resolv
   return {
     enabled: Boolean(config.enabled),
     displayName: nameLines.length >= 2 ? nameLines.join(" y ") : names,
-    dateLabel: (config.date_label || formatEnvelopeDate(event.main_date)).trim(),
+    dateLabel: (config.date_label || formatEnvelopeDate(event.main_date, event.timezone)).trim(),
     backgroundColor: config.background_color || DEFAULT_ENVELOPE.background_color!,
     envelopeColor: config.envelope_color || DEFAULT_ENVELOPE.envelope_color!,
     textColor: config.text_color || DEFAULT_ENVELOPE.text_color!,

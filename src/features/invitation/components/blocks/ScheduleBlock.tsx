@@ -1,6 +1,6 @@
-import { format } from "date-fns";
 import type { ScheduleConfig } from "@/features/invitation/types/blocks";
 import type { RenderContext } from "@/features/invitation/components/BlockRenderer";
+import { formatEventTime } from "@/lib/dates";
 
 type Props = { config: ScheduleConfig; ctx: RenderContext };
 
@@ -80,7 +80,7 @@ export function ScheduleBlock({ config, ctx }: Props) {
           {items.map((item, i) => {
             const Icon = ICONS[i % ICONS.length]!;
             const iconOnLeft = i % 2 === 0;
-            const timeLabel = `${format(new Date(item.starts_at), "HH:mm")} hrs`;
+            const timeLabel = `${formatEventTime(item.starts_at, ctx.event.timezone)} hrs`;
 
             const textBlock = (
               <div className={iconOnLeft ? "text-left" : "text-right"}>

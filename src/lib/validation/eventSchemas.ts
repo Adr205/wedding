@@ -34,7 +34,11 @@ const envelopeSchema = z.object({
 });
 
 export const eventFormSchema = z.object({
-  slug: z.string().min(3).regex(/^[a-z0-9-]+$/),
+  slug: z
+    .string()
+    .min(3)
+    .max(40)
+    .regex(/^[a-zA-Z0-9-]+$/, "Solo letras, números y guiones (ej. KSRC)"),
   event_type: z.enum(["wedding", "xv", "other"]),
   title: z.string().min(3),
   honoree_names: z.string().min(3),

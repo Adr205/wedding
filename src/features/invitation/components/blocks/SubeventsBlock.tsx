@@ -1,8 +1,7 @@
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import type { SubeventsConfig } from "@/features/invitation/types/blocks";
 import type { RenderContext } from "@/features/invitation/components/BlockRenderer";
 import { buildGoogleCalendarLink } from "@/features/calendar/buildCalendarLinks";
+import { formatEventWeekdayLong } from "@/lib/dates";
 
 type Props = { config: SubeventsConfig; ctx: RenderContext };
 
@@ -39,7 +38,7 @@ export function SubeventsBlock({ config, ctx }: Props) {
 
               {item.starts_at ? (
                 <p className="text-sm opacity-60 capitalize">
-                  {format(new Date(item.starts_at), "EEEE d 'de' MMMM · HH:mm", { locale: es })}
+                  {formatEventWeekdayLong(item.starts_at, ctx.event.timezone)}
                   {" hrs"}
                 </p>
               ) : null}
