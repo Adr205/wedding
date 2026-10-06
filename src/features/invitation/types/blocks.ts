@@ -78,6 +78,7 @@ export type HotelItem = {
 
 export type HotelsConfig = {
   title?: string;
+  message?: string;
   items: HotelItem[];
 };
 

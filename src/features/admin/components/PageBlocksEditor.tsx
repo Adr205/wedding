@@ -55,7 +55,11 @@ function defaultConfig(type: BlockType): Record<string, unknown> {
     case "gallery":      return { images: [], layout: "grid", columns: 3 };
     case "schedule":     return { title: "Itinerario", items: [] };
     case "location":     return { label: "", address: "", maps_url: "", starts_at: null, show_map: false };
-    case "hotels":       return { title: "Hospedaje", items: [{ name: "", address: "", url: "", discount_code: "" }] };
+    case "hotels":       return {
+      title: "Hospedaje",
+      message: "Contamos con código de descuento en hoteles cercanos. La reservación y el pago son por cuenta de cada invitado.",
+      items: [{ name: "", address: "", url: "", discount_code: "" }],
+    };
     case "parents":      return {
       title: "Con la bendición de",
       bride_label: "Padres de la novia",
@@ -413,6 +417,15 @@ function ConfigPanel({
           <label className="flex flex-col gap-1 text-sm">
             Título (opcional)
             <input className={inp()} placeholder="Hospedaje" value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Mensaje (opcional)
+            <textarea
+              className={inp("min-h-20")}
+              placeholder="Contamos con código de descuento en hoteles cercanos. La reservación y el pago son por cuenta de cada invitado."
+              value={cfg.message ?? ""}
+              onChange={(e) => set("message", e.target.value)}
+            />
           </label>
           {items.map((item, i) => (
             <div key={i} className="space-y-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
