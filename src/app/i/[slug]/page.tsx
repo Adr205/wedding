@@ -1,10 +1,28 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InvitationRenderer } from "@/features/invitation/components/InvitationRenderer";
 import { getInvitationBySlug } from "@/features/invitation/data/getInvitationBySlug";
+import { buildInvitationMetadata } from "@/features/invitation/seo/buildInvitationMetadata";
 
 type InvitationPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: InvitationPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const invitation = await getInvitationBySlug(slug);
+
+  if (!invitation) {
+    return {
+      title: "Invitación",
+      description: "Invitación digital",
+    };
+  }
+
+  return buildInvitationMetadata(invitation);
+}
 
 export default async function InvitationPage({ params }: InvitationPageProps) {
   const { slug } = await params;
