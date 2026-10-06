@@ -67,6 +67,16 @@ function defaultConfig(type: BlockType): Record<string, unknown> {
     case "schedule":     return { title: "Itinerario", items: [] };
     case "location":     return { label: "", address: "", maps_url: "", starts_at: null, show_map: false };
     case "hotels":       return { title: "Hospedaje", items: [{ name: "", address: "", url: "", discount_code: "" }] };
+    case "parents":      return {
+      title: "Con la bendición de",
+      bride_label: "Padres de la novia",
+      bride_parent_1: "",
+      bride_parent_2: "",
+      groom_label: "Padres del novio",
+      groom_parent_1: "",
+      groom_parent_2: "",
+    };
+    case "kids_policy":  return { title: "", allowed: true, message: "" };
     case "rsvp":         return { title: "", subtitle: "" };
     case "divider":      return { style: "ornament" };
     case "dress_code":   return { title: "", description: "", note: DEFAULT_DRESS_CODE_NOTE, colors: [] };
@@ -447,6 +457,87 @@ function ConfigPanel({
         </div>
       );
     }
+
+    case "parents":
+      return (
+        <div className="space-y-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Título (opcional)
+            <input className={inp()} placeholder="Con la bendición de" value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
+          </label>
+          <div className="space-y-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+            <label className="flex flex-col gap-1 text-sm">
+              Etiqueta — novia
+              <input className={inp()} placeholder="Padres de la novia" value={cfg.bride_label ?? ""} onChange={(e) => set("bride_label", e.target.value)} />
+            </label>
+            <input className={inp("w-full")} placeholder="Nombre del padre o madre" value={cfg.bride_parent_1 ?? ""}
+              onChange={(e) => set("bride_parent_1", e.target.value)} />
+            <input className={inp("w-full")} placeholder="Nombre del padre o madre" value={cfg.bride_parent_2 ?? ""}
+              onChange={(e) => set("bride_parent_2", e.target.value)} />
+          </div>
+          <div className="space-y-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+            <label className="flex flex-col gap-1 text-sm">
+              Etiqueta — novio
+              <input className={inp()} placeholder="Padres del novio" value={cfg.groom_label ?? ""} onChange={(e) => set("groom_label", e.target.value)} />
+            </label>
+            <input className={inp("w-full")} placeholder="Nombre del padre o madre" value={cfg.groom_parent_1 ?? ""}
+              onChange={(e) => set("groom_parent_1", e.target.value)} />
+            <input className={inp("w-full")} placeholder="Nombre del padre o madre" value={cfg.groom_parent_2 ?? ""}
+              onChange={(e) => set("groom_parent_2", e.target.value)} />
+          </div>
+        </div>
+      );
+
+    case "kids_policy":
+      return (
+        <div className="space-y-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Título (opcional)
+            <input
+              className={inp()}
+              placeholder={cfg.allowed !== false ? "Los niños son bienvenidos" : "Evento solo para adultos"}
+              value={cfg.title ?? ""}
+              onChange={(e) => set("title", e.target.value)}
+            />
+          </label>
+          <fieldset className="space-y-2">
+            <legend className="text-sm">¿Se aceptan niños?</legend>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="radio"
+                name={`kids_policy_allowed-${block.id ?? block.display_order}-${depth}`}
+                checked={cfg.allowed !== false}
+                onChange={() => set("allowed", true)}
+                className="rounded-full"
+              />
+              Sí, los niños son bienvenidos
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="radio"
+                name={`kids_policy_allowed-${block.id ?? block.display_order}-${depth}`}
+                checked={cfg.allowed === false}
+                onChange={() => set("allowed", false)}
+                className="rounded-full"
+              />
+              No, celebración solo para adultos
+            </label>
+          </fieldset>
+          <label className="flex flex-col gap-1 text-sm">
+            Mensaje (opcional)
+            <textarea
+              className={inp("min-h-20")}
+              placeholder={
+                cfg.allowed !== false
+                  ? "Los niños son bienvenidos a celebrar con nosotros."
+                  : "Con mucho cariño, les pedimos que esta celebración sea solo para adultos."
+              }
+              value={cfg.message ?? ""}
+              onChange={(e) => set("message", e.target.value)}
+            />
+          </label>
+        </div>
+      );
 
     case "location":
       return (

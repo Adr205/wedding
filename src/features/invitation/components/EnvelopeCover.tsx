@@ -85,7 +85,7 @@ function EnvelopeCover({ envelope, fontKey, onOpen }: CoverProps) {
           type="button"
           onClick={onOpen}
           aria-label="Abrir invitación"
-          className="group relative mt-14 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-current/30 rounded-sm"
+          className="group relative mt-14 cursor-pointer touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-current/30 rounded-sm"
         >
           <div className="relative w-[280px] sm:w-[340px] transition-transform duration-300 group-hover:-translate-y-1">
             <PaperEnvelope
@@ -140,12 +140,14 @@ function PaperEnvelope({ color, textureUrl }: { color: string; textureUrl?: stri
         className="absolute inset-x-0 top-0 h-[53%]"
         style={{
           clipPath: "polygon(0 0, 100% 0, 50% 100%)",
+          WebkitClipPath: "polygon(0 0, 100% 0, 50% 100%)",
           ...(useTexture
             ? {
                 backgroundImage: `url(${textureUrl})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center top",
                 filter: "brightness(1.06)",
+                WebkitFilter: "brightness(1.06)",
               }
             : {
                 background: `linear-gradient(160deg, ${highlight} 0%, ${flap} 55%, ${color} 100%)`,

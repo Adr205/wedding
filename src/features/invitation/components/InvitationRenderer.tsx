@@ -60,7 +60,7 @@ export function InvitationRenderer({ invitation }: InvitationRendererProps) {
                   backgroundImage: `url(${bgUrl})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
-                  backgroundAttachment: "fixed",
+                  // Avoid background-attachment:fixed — breaks paint/scroll on Safari/iOS/WebViews.
                 }
               : {}),
             ...(textColor ? { color: textColor } : {}),

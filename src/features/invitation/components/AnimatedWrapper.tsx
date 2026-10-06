@@ -40,7 +40,8 @@ export function AnimatedWrapper({ animation, children }: Props) {
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "0px 0px -30% 0px" }}
+      // Loose viewport so Safari / in-app browsers don't leave blocks stuck at opacity 0
+      viewport={{ once: true, amount: 0.15, margin: "0px 0px -10% 0px" }}
       variants={variants[animation]}
       transition={{ duration: 0.55, ease: "easeOut" }}
     >
