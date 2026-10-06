@@ -1,4 +1,4 @@
-import { buildGoogleCalendarLink } from "@/features/calendar/buildCalendarLinks";
+import { buildCalendarTitle, buildGoogleCalendarLink } from "@/features/calendar/buildCalendarLinks";
 import { buildWhatsappLink } from "@/features/rsvp/whatsapp";
 import type { FullInvitation } from "@/features/invitation/types";
 
@@ -14,10 +14,11 @@ export function RsvpButtons({ invitation, ctaClassName }: RsvpButtonsProps) {
     eventTitle: invitation.event.title,
   });
 
+  const calendarTitle = buildCalendarTitle(invitation.event.title, invitation.event.event_type);
   const calendarLink = buildGoogleCalendarLink({
-    title: invitation.event.title,
+    title: calendarTitle,
     startIso: invitation.event.main_date,
-    details: `Invitación a ${invitation.event.title}`,
+    details: `Invitación a ${calendarTitle}`,
     location: undefined,
   });
 

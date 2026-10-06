@@ -2,6 +2,16 @@ function toUtcString(dateIso: string) {
   return new Date(dateIso).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 }
 
+/** Calendar title only — prefixes "Boda" for weddings without changing the stored event title. */
+export function buildCalendarTitle(title: string, eventType?: string): string {
+  const heart = "🤍";
+  const trimmed = title.trim().replace(/\s*🤍\s*$/u, "").trim();
+  if (!trimmed) return `Boda ${heart}`;
+  if (eventType && eventType !== "wedding") return `${trimmed} ${heart}`;
+  if (/^boda\b/i.test(trimmed)) return `${trimmed} ${heart}`;
+  return `Boda ${trimmed} ${heart} `;
+}
+
 export function buildGoogleCalendarLink({
   title,
   startIso,
