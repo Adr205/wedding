@@ -9,7 +9,7 @@ export function buildCalendarTitle(title: string, eventType?: string): string {
   if (!trimmed) return `Boda ${heart}`;
   if (eventType && eventType !== "wedding") return `${trimmed} ${heart}`;
   if (/^boda\b/i.test(trimmed)) return `${trimmed} ${heart}`;
-  return `Boda ${trimmed} ${heart} `;
+  return `Boda ${trimmed} ${heart}`;
 }
 
 export function buildGoogleCalendarLink({
