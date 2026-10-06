@@ -52,7 +52,7 @@ export function GuestGalleryUploader({ slug, ctaClassName }: Props) {
         placeholder="Tu nombre (opcional)"
         value={uploaderName}
         onChange={(e) => setUploaderName(e.target.value)}
-        className="w-full rounded-xl border border-white/30 bg-white/20 backdrop-blur-sm px-4 py-2.5 text-sm placeholder:opacity-40 focus:outline-none focus:ring-2 focus:ring-white/50"
+        className="w-full rounded-xl border border-current/25 bg-white/55 px-4 py-2.5 text-sm text-stone-900 placeholder:text-stone-700 placeholder:opacity-100 focus:outline-none focus:ring-2 focus:ring-current/25"
       />
       <input
         type="text"

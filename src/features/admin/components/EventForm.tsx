@@ -10,6 +10,7 @@ import { PageBlocksEditor } from "@/features/admin/components/PageBlocksEditor";
 import { EnvelopeEditor } from "@/features/admin/components/EnvelopeEditor";
 import type { PageBlock } from "@/features/invitation/types/blocks";
 import { mergeEnvelope, type EnvelopeConfig } from "@/features/invitation/types/envelope";
+import { dateTimeLocalToIso, toDateTimeLocalValue } from "@/lib/dates";
 
 type EventFormProps = {
   mode: "create" | "edit";
@@ -132,14 +133,29 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
     >
       {/* ── Datos del evento ───────────────────────────── */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-sm">
-          Slug
-          <input
-            className="rounded-lg border border-zinc-300 p-2"
-            value={form.slug}
-            onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
-            required
-          />
+        <label className="flex flex-col gap-1 text-sm sm:col-span-2">
+          URL de la invitación
+          <div className="flex items-center gap-0 rounded-lg border border-zinc-300 overflow-hidden">
+            <span className="shrink-0 bg-zinc-100 px-3 py-2 text-sm text-zinc-500 border-r border-zinc-300">
+              /i/
+            </span>
+            <input
+              className="min-w-0 flex-1 border-0 p-2 font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-300"
+              value={form.slug}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  slug: e.target.value.replace(/[^a-zA-Z0-9-]/g, ""),
+                }))
+              }
+              placeholder="KSRC"
+              required
+            />
+          </div>
+          <p className="text-xs text-zinc-400">
+            Enlace público: <span className="font-mono text-zinc-600">/i/{form.slug || "…"}</span>
+            {" · "}Letras, números o guiones (ej. iniciales de los novios).
+          </p>
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
@@ -180,9 +196,12 @@ export function EventForm({ mode, eventId, initialValues }: EventFormProps) {
           <input
             type="datetime-local"
             className="rounded-lg border border-zinc-300 p-2"
-            value={new Date(form.main_date).toISOString().slice(0, 16)}
+            value={toDateTimeLocalValue(form.main_date)}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, main_date: new Date(e.target.value).toISOString() }))
+              setForm((prev) => ({
+                ...prev,
+                main_date: dateTimeLocalToIso(e.target.value) ?? prev.main_date,
+              }))
             }
             required
           />

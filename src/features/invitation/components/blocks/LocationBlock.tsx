@@ -1,7 +1,6 @@
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import type { LocationConfig } from "@/features/invitation/types/blocks";
 import type { RenderContext } from "@/features/invitation/components/BlockRenderer";
+import { formatEventWeekdayShort } from "@/lib/dates";
 
 function buildMapsLink(address: string, mapsUrl?: string | null): string {
   if (mapsUrl) return mapsUrl;
@@ -55,7 +54,7 @@ export function LocationBlock({ config, ctx }: Props) {
 
         {config.starts_at ? (
           <p className="text-xs opacity-40 mt-2 tracking-[0.2em] uppercase">
-            {format(new Date(config.starts_at), "EEEE d MMM · HH:mm", { locale: es })}
+            {formatEventWeekdayShort(config.starts_at, ctx.event.timezone)}
           </p>
         ) : null}
 

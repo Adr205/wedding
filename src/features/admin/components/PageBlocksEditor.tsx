@@ -37,23 +37,12 @@ import {
 } from "@/features/invitation/types/blocks";
 import { GalleryManager, type GalleryItem } from "@/features/admin/components/GalleryManager";
 import { ImageUploadButton } from "@/features/admin/components/ImageUploadButton";
+import { dateTimeLocalToIso, toDateTimeLocalValue } from "@/lib/dates";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function toDateTimeLocalValue(isoDate: string | null | undefined) {
-  if (!isoDate) return "";
-  const d = new Date(isoDate);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return (
-    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
-    `T${pad(d.getHours())}:${pad(d.getMinutes())}`
-  );
-}
-
 function toIsoOrNull(local: string) {
-  if (!local) return null;
-  return new Date(local).toISOString();
+  return dateTimeLocalToIso(local);
 }
 
 function defaultConfig(type: BlockType): Record<string, unknown> {

@@ -1,7 +1,11 @@
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import type { HeroConfig } from "@/features/invitation/types/blocks";
 import type { RenderContext } from "@/features/invitation/components/BlockRenderer";
+import {
+  formatEventDay,
+  formatEventMonth,
+  formatEventTime,
+  formatEventYear,
+} from "@/lib/dates";
 
 const EVENT_LABEL: Record<string, string> = {
   wedding: "Nos casamos",
@@ -13,7 +17,7 @@ type Props = { config: HeroConfig; ctx: RenderContext };
 
 export function HeroBlock({ config, ctx }: Props) {
   const { event, themeObj, fontFamily } = ctx;
-  const mainDate = new Date(event.main_date);
+  const tz = event.timezone;
   const showDatePill = config.show_date_pill !== false;
 
   return (
@@ -48,20 +52,20 @@ export function HeroBlock({ config, ctx }: Props) {
               className="text-5xl sm:text-6xl font-bold leading-none tracking-wide"
               style={{ fontFamily }}
             >
-              {format(mainDate, "d", { locale: es })}
+              {formatEventDay(event.main_date, tz)}
             </p>
             <div className="pb-1.5 text-left">
               <p className="text-xs uppercase tracking-[0.35em] opacity-55 capitalize font-semibold">
-                {format(mainDate, "MMMM", { locale: es })}
+                {formatEventMonth(event.main_date, tz)}
               </p>
               <p className="text-sm opacity-40 tracking-widest mt-0.5 font-semibold">
-                {format(mainDate, "yyyy")}
+                {formatEventYear(event.main_date, tz)}
               </p>
             </div>
           </div>
           <span className="h-px w-10 bg-current opacity-20" />
           <p className="text-xs tracking-[0.4em] uppercase opacity-45 font-semibold">
-            {format(mainDate, "HH:mm")} hrs
+            {formatEventTime(event.main_date, tz)} hrs
           </p>
         </div>
       ) : null}
